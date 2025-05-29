@@ -13,6 +13,7 @@ async function main() {
       nickname: 'admin1',
       isAdmin: true,
       balance: 1000, // Админу тоже дадим немного денег
+      cardNumber: 10001,
     },
   });
   console.log('Admin admin1 created/ensured.');
@@ -25,6 +26,7 @@ async function main() {
       nickname: 'dogbanker',
       isBanker: true,
       balance: 500,
+      cardNumber: 10002,
     },
   });
   console.log('Banker dogbanker created/ensured.');
@@ -36,6 +38,7 @@ async function main() {
       nickname: 'catbanker',
       isBanker: true,
       balance: 500,
+      cardNumber: 10003,
     },
   });
   console.log('Banker catbanker created/ensured.');
@@ -47,6 +50,7 @@ async function main() {
     create: {
       nickname: 'player1',
       balance: 100,
+      cardNumber: 10004,
     },
   });
   console.log('Player player1 created/ensured.');
@@ -57,6 +61,7 @@ async function main() {
     create: {
       nickname: 'player2',
       balance: 150,
+      cardNumber: 10005,
     },
   });
   console.log('Player player2 created/ensured.');

@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "nickname" TEXT NOT NULL,
+    "cardNumber" INTEGER NOT NULL,
     "balance" INTEGER NOT NULL DEFAULT 100,
     "isBanker" BOOLEAN NOT NULL DEFAULT false,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
@@ -10,4 +10,4 @@ CREATE TABLE "User" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_nickname_key" ON "User"("nickname");
+CREATE UNIQUE INDEX "User_cardNumber_key" ON "User"("cardNumber");

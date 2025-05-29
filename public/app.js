@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     const welcomeMessage = document.getElementById('welcome-message');
     const userBalanceSpan = document.getElementById('user-balance');
+    const userCardNumberSpan = document.getElementById('user-card-number');
     const actionResultDiv = document.getElementById('action-result');
 
     const playerActionsDiv = document.getElementById('player-actions');
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mainAppSection.style.display = 'block';
             welcomeMessage.textContent = `Добро пожаловать, ${currentUser.nickname}!`;
             userBalanceSpan.textContent = currentUser.balance;
+            userCardNumberSpan.textContent = currentUser.cardNumber;
 
             playerActionsDiv.style.display = 'block'; // Всегда доступно
             bankerActionsDiv.style.display = currentUser.isBanker ? 'block' : 'none';
@@ -62,9 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     loginButton.addEventListener('click', async () => {
-        const nickname = loginNicknameInput.value.trim();
+        const nickname = document.getElementById('login-nickname').value.trim();
         if (!nickname) {
-            showResult('Пожалуйста, введите ник.', true);
+            showResult('Пожалуйста, введите никнейм.', true);
             return;
         }
         const data = await apiCall('/api/login', 'POST', { nickname });
@@ -84,27 +86,26 @@ document.addEventListener('DOMContentLoaded', () => {
         showResult('Вы вышли из системы.');
     });
 
-    // Player Actions
-    document.getElementById('transfer-button').addEventListener('click', async () => {
+     // Player Actions
+     document.getElementById('transfer-button').addEventListener('click', async () => {
         if (!currentUser) return;
-        const receiverNickname = document.getElementById('transfer-receiver').value.trim();
+        const receiverCardNumber = document.getElementById('transfer-receiver').value.trim();
         const amount = parseInt(document.getElementById('transfer-amount').value, 10);
 
-        if (!receiverNickname || !amount || amount <= 0) {
+        if (!receiverCardNumber || !amount || amount <= 0) {
             showResult('Введите корректные данные для перевода.', true);
             return;
         }
         const data = await apiCall('/api/player/transfer', 'POST', {
-            senderNickname: currentUser.nickname,
-            receiverNickname,
+            senderCardNumber: currentUser.cardNumber,
+            receiverCardNumber,
             amount
         });
         if (data) {
             showResult(data.message);
             if (data.senderBalance !== undefined) {
                 currentUser.balance = data.senderBalance;
-                userBalanceSpan.textContent = currentUser.balance;
-                localStorage.setItem('bankAppUser', JSON.stringify(currentUser));
+                userBalanceSpan.textContent = currentUser.balance; // Обновляем баланс
             }
              // Очистка полей
             document.getElementById('transfer-receiver').value = '';
@@ -112,26 +113,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Banker Actions
-    document.getElementById('deposit-button').addEventListener('click', async () => {
+     // Banker Actions
+     document.getElementById('deposit-button').addEventListener('click', async () => {
         if (!currentUser || !currentUser.isBanker) return;
-        const targetNickname = document.getElementById('deposit-target').value.trim();
+        const targetCardNumber = document.getElementById('deposit-target').value.trim();
         const amount = parseInt(document.getElementById('deposit-amount').value, 10);
         const data = await apiCall('/api/banker/deposit', 'POST', {
-            bankerNickname: currentUser.nickname,
-            targetNickname,
+            bankerCardNumber: currentUser.cardNumber,
+            targetCardNumber,
             amount
         });
         if (data) {
             showResult(data.message);
             // Если пополняли себе, обновить баланс
-            if (targetNickname === currentUser.nickname && data.message.includes("New balance")) {
-                 const newBalance = parseInt(data.message.split("New balance: ")[1]);
-                 if(!isNaN(newBalance)) {
-                    currentUser.balance = newBalance;
-                    userBalanceSpan.textContent = currentUser.balance;
-                    localStorage.setItem('bankAppUser', JSON.stringify(currentUser));
-                 }
+            if (targetCardNumber == currentUser.cardNumber && data.message.includes("New balance")) {
+                currentUser.balance = parseInt(data.message.split(": ")[1]);
+                userBalanceSpan.textContent = currentUser.balance;
             }
              // Очистка полей
             document.getElementById('deposit-target').value = '';
@@ -141,23 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('withdraw-button').addEventListener('click', async () => {
         if (!currentUser || !currentUser.isBanker) return;
-        const targetNickname = document.getElementById('withdraw-target').value.trim();
+        const targetCardNumber = document.getElementById('withdraw-target').value.trim();
         const amount = parseInt(document.getElementById('withdraw-amount').value, 10);
         const data = await apiCall('/api/banker/withdraw', 'POST', {
-            bankerNickname: currentUser.nickname,
-            targetNickname,
+            bankerCardNumber: currentUser.cardNumber,
+            targetCardNumber,
             amount
         });
         if (data) {
             showResult(data.message);
              // Если отнимали у себя, обновить баланс
-            if (targetNickname === currentUser.nickname && data.message.includes("New balance")) {
-                 const newBalance = parseInt(data.message.split("New balance: ")[1]);
-                 if(!isNaN(newBalance)) {
-                    currentUser.balance = newBalance;
-                    userBalanceSpan.textContent = currentUser.balance;
-                    localStorage.setItem('bankAppUser', JSON.stringify(currentUser));
-                 }
+            if (targetCardNumber == currentUser.cardNumber && data.message.includes("New balance")) {
+                currentUser.balance = parseInt(data.message.split(": ")[1]);
+                userBalanceSpan.textContent = currentUser.balance;
             }
             // Очистка полей
             document.getElementById('withdraw-target').value = '';
@@ -167,54 +160,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('getbalance-button').addEventListener('click', async () => {
         if (!currentUser || !currentUser.isBanker) return;
-        const targetNickname = document.getElementById('getbalance-target').value.trim();
+        const targetCardNumber = document.getElementById('getbalance-target').value.trim();
         const data = await apiCall('/api/banker/balance', 'POST', {
-            bankerNickname: currentUser.nickname,
-            targetNickname
+            bankerCardNumber: currentUser.cardNumber,
+            targetCardNumber
         });
         if (data) {
-            showResult(`Баланс ${data.nickname}: ${data.balance}`);
-            document.getElementById('getbalance-target').value = ''; // Очистка поля
-        }
+            showResult(`Баланс ${data.cardNumber}: ${data.balance}`);
+            document.getElementById('getbalance-target').value = '';        }
     });
 
-    // Admin Actions
-    document.getElementById('addbanker-button').addEventListener('click', async () => {
+     // Admin Actions
+     document.getElementById('addbanker-button').addEventListener('click', async () => {
         if (!currentUser || !currentUser.isAdmin) return;
-        const targetNickname = document.getElementById('addbanker-target').value.trim();
+        const targetCardNumber = document.getElementById('addbanker-target').value.trim();
         const data = await apiCall('/api/admin/add-banker', 'POST', {
-            adminNickname: currentUser.nickname,
-            targetNickname
+            adminCardNumber: currentUser.cardNumber,
+            targetCardNumber
         });
         if (data) {
             showResult(data.message);
              // Если текущий пользователь стал банкиром, обновить его состояние
-            if (targetNickname === currentUser.nickname) {
+            if (targetCardNumber == currentUser.cardNumber) {
                 currentUser.isBanker = true;
                 localStorage.setItem('bankAppUser', JSON.stringify(currentUser));
-                updateUIForUser(); // Обновить UI, чтобы показать секцию банкира
+                bankerActionsDiv.style.display = 'block';
             }
-            document.getElementById('addbanker-target').value = ''; // Очистка поля
-        }
+            document.getElementById('addbanker-target').value = '';        }
     });
 
     document.getElementById('removebanker-button').addEventListener('click', async () => {
         if (!currentUser || !currentUser.isAdmin) return;
-        const targetNickname = document.getElementById('removebanker-target').value.trim();
+        const targetCardNumber = document.getElementById('removebanker-target').value.trim();
         const data = await apiCall('/api/admin/remove-banker', 'POST', {
-            adminNickname: currentUser.nickname,
-            targetNickname
+            adminCardNumber: currentUser.cardNumber,
+            targetCardNumber
         });
         if (data) {
             showResult(data.message);
             // Если с текущего пользователя сняли роль банкира
-            if (targetNickname === currentUser.nickname) {
+            if (targetCardNumber == currentUser.cardNumber) {
                 currentUser.isBanker = false;
                 localStorage.setItem('bankAppUser', JSON.stringify(currentUser));
-                updateUIForUser(); // Обновить UI
+                bankerActionsDiv.style.display = 'none';
             }
-            document.getElementById('removebanker-target').value = ''; // Очистка поля
-        }
+            document.getElementById('removebanker-target').value = '';        }
     });
 
     // --- Initialization ---

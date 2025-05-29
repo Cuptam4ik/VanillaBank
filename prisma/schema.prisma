@@ -12,8 +12,9 @@ datasource db {
 
 model User {
   id        Int     @id @default(autoincrement())
+  cardNumber Int     @unique
   nickname  String  @unique
-  balance   Int     @default(100) // Начальный баланс для всех, можно 0
+  balance   Int     @default(100)
   isBanker  Boolean @default(false)
   isAdmin   Boolean @default(false)
   createdAt DateTime @default(now())
