@@ -10,13 +10,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OperationBy {
+  PLAYER
+  BANK
+}
+
+enum TransactionType {
+  WITHDRAWAL
+  DEPOSIT
+  TRANSFER
+}
+
 model User {
-  id        Int     @id @default(autoincrement())
-  cardNumber Int     @unique
-  nickname  String  @unique
-  balance   Int     @default(100)
-  isBanker  Boolean @default(false)
-  isAdmin   Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               Int             @id @default(autoincrement())
+  cardNumber       Int             @unique
+  nickname         String          @unique
+  password         String
+  balance          Int             @default(100)
+  isBanker         Boolean         @default(false)
+  isAdmin          Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  sentTransactions     Transaction[] @relation("SenderTransactions")
+  receivedTransactions Transaction[] @relation("ReceiverTransactions")
+}
+
+model Transaction {
+  id                 Int           @id @default(autoincrement())
+  senderCardNumber   Int?
+  receiverCardNumber Int?
+  amount             Int
+  operationBy        OperationBy
+  type               TransactionType
+  createdAt          DateTime      @default(now())
+  sender             User?         @relation("SenderTransactions", fields: [senderCardNumber], references: [cardNumber])
+  receiver           User?         @relation("ReceiverTransactions", fields: [receiverCardNumber], references: [cardNumber])
 }

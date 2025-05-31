@@ -1,81 +1,705 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Банковское Приложение</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="app-container">
-        <div id="login-section">
-            <h2>Вход</h2>
-            <input type="text" id="login-nickname" placeholder="Ваш никнейм">
-            <button id="login-button">Войти / Зарегистрироваться</button>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <title>VanillaPlus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <div class="navbar">
+      <div class="logo" id="logo">
+        <img src="images/logo.png" alt="VanillaPlus Logo" width="48" height="40" style="margin-right: 8px;">
+        VanillaPlus
+      </div>
+      <div
+        class="hamburger"
+        id="hamburger-btn"
+        aria-label="Open menu"
+        tabindex="0"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 15 15"
+        >
+          <path
+            fill="currentColor"
+            fill-rule="evenodd"
+            d="M1.5 3a.5.5 0 0 0 0 1h12a.5.5 0 0 0 0-1zM1 7.5a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 0 1h-12a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 0 1h-12a.5.5 0 0 1-.5-.5"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
 
-        <div id="main-app" style="display:none;">
-            <h2 id="welcome-message"></h2>
-            <div id="user-info">
-                <p>Баланс: <span id="user-balance"></span></p>
-                <p>Номер карты: <span id="user-card-number"></span></p>
-            </div>
-            <button id="logout-button">Выйти</button>
-            <hr>
-
-            <div id="player-actions">
-                <h3>Действия Игрока</h3>
-                <div>
-                    <h4>Перевести деньги</h4>
-                    <input type="number" id="transfer-receiver" placeholder="Номер карты получателя">
-                    <input type="number" id="transfer-amount" placeholder="Сумма">
-                    <button id="transfer-button">Перевести</button>
-                </div>
-            </div>
-            <hr>
-
-            <div id="banker-actions" style="display:none;">
-                <h3>Действия Банкира (Вы <span class="current-role">Банкир</span>)</h3>
-                <div>
-                    <h4>Пополнить баланс игрока</h4>
-                    <input type="number" id="deposit-target" placeholder="Номер карты игрока">
-                    <input type="number" id="deposit-amount" placeholder="Сумма">
-                    <button id="deposit-button">Пополнить</button>
-                </div>
-                <div>
-                    <h4>Отнять деньги у игрока</h4>
-                    <input type="number" id="withdraw-target" placeholder="Номер карты игрока">
-                    <input type="number" id="withdraw-amount" placeholder="Сумма">
-                    <button id="withdraw-button">Отнять</button>
-                </div>
-                <div>
-                    <h4>Узнать баланс игрока</h4>
-                    <input type="number" id="getbalance-target" placeholder="Номер карты игрока">
-                    <button id="getbalance-button">Узнать баланс</button>
-                </div>
-            </div>
-            <hr>
-
-            <div id="admin-actions" style="display:none;">
-                <h3>Действия Админа (Вы <span class="current-role">Администратор</span>)</h3>
-                <div>
-                    <h4>Добавить банкира</h4>
-                    <input type="number" id="addbanker-target" placeholder="Номер карты пользователя">
-                    <button id="addbanker-button">Сделать банкиром</button>
-                </div>
-                <div>
-                    <h4>Удалить банкира</h4>
-                    <input type="number" id="removebanker-target" placeholder="Номер карты пользователя">
-                    <button id="removebanker-button">Убрать из банкиров</button>
-                </div>
-            </div>
-            <hr>
-            <div id="action-result">
-                <p>Результаты действий здесь...</p>
-            </div>
-        </div>
+    <div class="modal" id="card-op-modal" style="display: none;">
+      <div class="modal-content">
+        <h2 id="card-op-modal-title" class="modal-title">Операция с картой</h2>
+        <input type="number" id="card-op-modal-input1" class="modal-input" placeholder="Введите данные" />
+        <input type="number" id="card-op-modal-input2" class="modal-input" placeholder="Введите сумму" />
+        <button id="card-op-modal-button" class="modal-button">Подтвердить</button>
+        <div id="card-op-modal-status" class="modal-status"></div>
+      </div>
     </div>
 
-    <script src="app.js"></script>
-</body>
+    <div class="modal" id="card-op-sec-modal" style="display: none;">
+      <div class="modal-content">
+        <h2 id="card-op-sec-modal-title" class="modal-title">Операция с картой</h2>
+        <input type="text" id="card-op-sec-modal-input" class="modal-input" placeholder="" />
+        <button id="card-op-sec-modal-button" class="modal-button">Подтвердить</button>
+        <div id="card-op-sec-modal-status" class="modal-status"></div>
+      </div>
+    </div>
+
+    <div class="modal" id="auth-modal" style="display: none;">
+      <div class="modal-content">
+        <h2 class="modal-title">Вход/Регистрация</h2>
+        <input type="text" id="auth-username" class="modal-input" placeholder="Введите имя пользователя" />
+        <input type="password" id="auth-password" class="modal-input" placeholder="Введите пароль..." />
+        <button id="auth-login-button" class="modal-button">Войти</button>
+          <button id="auth-reg-button" class="modal-button action">Регистрация</button>
+        <div id="auth-modal-status" class="modal-status"></div>
+      </div>
+    </div>
+
+
+    <nav class="side-menu" id="side-menu">
+      <button id="bank-btn" class="menu">
+        Банк 
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M9.368 1.222a1 1 0 0 0-1.414.15L5.058 5h1.28l2.397-3.004l.77.629L7.575 5h1.288l1.417-1.744l1.718 1.403L11.7 5h.3a3 3 0 0 1 .88.131a1 1 0 0 0-.25-1.245zM3 5.5a.5.5 0 0 1 .5-.5h.558l.795-1H3.5A1.5 1.5 0 0 0 2 5.5v6A2.5 2.5 0 0 0 4.5 14H12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H3.5a.5.5 0 0 1-.5-.5m7.5 4.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1"/></svg>
+      </button>
+      <button id="bank-managment-btn" class="menu">
+        Банкирская
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M7.292 1.712c.418-.32.999-.32 1.417 0l4.962 3.793c.632.483.293 1.491-.501 1.495H2.83c-.793-.004-1.133-1.012-.5-1.495zM8 5.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5M3.5 8v3H5V8zM6 8v3h1.5V8zm2.5 0v3H10V8zM11 8v3h1.5V8zm-9 5.25c0-.69.56-1.25 1.25-1.25h9.5c.69 0 1.25.56 1.25 1.25v.25a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5z"/></svg>
+      </button>
+      <button id="bank-transactions-btn" class="menu">
+        Транзакции
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M10.354 1.646a.5.5 0 0 0-.708.708L11.293 4H3.5a.5.5 0 0 0 0 1h7.793L9.646 6.646a.5.5 0 1 0 .708.708l2.5-2.5a.5.5 0 0 0 0-.708zm-4 7.708a.5.5 0 1 0-.708-.708l-2.5 2.5a.5.5 0 0 0 0 .708l2.5 2.5a.5.5 0 0 0 .708-.708L4.707 12H12.5a.5.5 0 0 0 0-1H4.707z"/></svg>
+      </button>
+      <div class="filler"></div>
+      <button id="exit-btn" class="menu exit">
+        Выход
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 4.001H5v14a2 2 0 0 0 2 2h8m1-5l3-3m0 0l-3-3m3 3H9"/></svg>
+      </button>
+    </nav>
+    <main class="main-content" id="main-content">
+      <div class="centered-div" id="welcome-div">
+          <div class="additional-info">play.bixland.ru 1.21.4+</div>
+      </div>
+      <div id="bank-page">
+        <div class="bank-main">
+          <div class="card">
+            <div class="card-header">
+                <span id="card-holder">Mr. Test</span>
+                <span id="card-telegram-id">@mr_test</span>
+                <div class="filler"></div>
+                <span id="card-edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+                </span>
+            </div>
+            <div class="card-body"></div>
+            <div class="card-footer">
+              <span id="card-balance">1000 аб</span>
+              <span id="card-number">12343</span>
+            </div>
+          </div>
+        <div class="bank-operations">
+             <button id="card-send-btn" class="action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>
+                Перевод по карте 
+            </button>
+             <button id="bank-btn" class="action" disabled>Штрафы (скоро...)</button>
+        </div>
+        </div>
+        <div class="bank-personal-transactions">
+            <h2 class="transaction-title">Ваши транзакции:</h2>
+            <div id="personal-transaction-list" class="transaction-list">
+            </div>
+        </div>
+      </div>
+       <div id="bank-management-page" style="display: none;">
+           <button id="check-balance-btn" class="action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/></svg>
+            Посмотреть баланс</button>
+           <button id="card-deposit-btn" class="action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 20H9v-8H4.16L12 4.16L19.84 12H15z"/></svg>
+            Пополнить</button>
+           <button id="card-withdraw-btn" class="action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9 4h6v8h4.84L12 19.84L4.16 12H9z"/></svg>
+            Списать</button>
+           <button id="add-banker" class="action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"/></svg>
+            Назначить банкира</button>
+           <button id="remove-banker" class="action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4 8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
+            Уволить банкира</button>
+       </div>
+       <div id="bank-transactions-page" style="display: none;">
+           <h2 class="transaction-title">Транзакции</h2>
+           <div id="transaction-list" class="transaction-list">
+
+           </div>
+       </div>
+    </main>
+    <script>
+      const hamburgerBtn = document.getElementById("hamburger-btn");
+      const sideMenu = document.getElementById("side-menu");
+      const overlay = document.getElementById("overlay");
+      const bankBtn = document.getElementById("bank-btn");
+      const bankManagmentBtn = document.getElementById("bank-managment-btn");
+      const transactionsBtn = document.getElementById("bank-transactions-btn");
+      const welcomeDiv = document.getElementById("welcome-div");
+      const bankPage = document.getElementById("bank-page");
+      const bankManagementPage = document.getElementById("bank-management-page");
+      const bankTransactionsPage = document.getElementById("bank-transactions-page");
+      const bankTransactionsBtn = document.getElementById("bank-transactions-btn");
+      const logo = document.getElementById("logo");
+
+      // Two input modal elements
+      const cardOpModal = document.getElementById("card-op-modal");
+      const cardOpModalTitle = document.getElementById("card-op-modal-title");
+      const cardOpModalInput1 = document.getElementById("card-op-modal-input1");
+      const cardOpModalInput2 = document.getElementById("card-op-modal-input2");
+      const cardOpModalButton = document.getElementById("card-op-modal-button");
+      const cardOpModalStatus = document.getElementById("card-op-modal-status");
+
+      // Single input modal elements
+      const cardOpSecModal = document.getElementById("card-op-sec-modal");
+      const cardOpSecModalTitle = document.getElementById("card-op-sec-modal-title");
+      const cardOpSecModalInput = document.getElementById("card-op-sec-modal-input");
+      const cardOpSecModalButton = document.getElementById("card-op-sec-modal-button");
+      const cardOpSecModalStatus = document.getElementById("card-op-sec-modal-status");
+
+      // Auth modal elements
+      const authModal = document.getElementById("auth-modal");
+      const authUsernameInput = document.getElementById("auth-username");
+      const authPasswordInput = document.getElementById("auth-password");
+      const authLoginButton = document.getElementById("auth-login-button");
+      const authRegButton = document.getElementById("auth-reg-button");
+      const authModalStatus = document.getElementById("auth-modal-status");
+      const exitBtn = document.getElementById("exit-btn");
+
+      // Card operation buttons
+      const cardSendBtn = document.getElementById("card-send-btn");
+      const cardDepositBtn = document.getElementById("card-deposit-btn");
+      const cardWithdrawBtn = document.getElementById("card-withdraw-btn");
+      const addBankerBtn = document.getElementById("add-banker");
+      const removeBankerBtn = document.getElementById("remove-banker");
+      const checkBalanceBtn = document.getElementById("check-balance-btn");
+
+      // Card information elements
+      const cardBalanceSpan = document.getElementById("card-balance");
+      const cardNumberSpan = document.getElementById("card-number");
+      const cardHolderSpan = document.getElementById("card-holder");
+      const cardTelegramIdSpan = document.getElementById("card-telegram-id");
+
+
+      let menuOpened = false;
+      let currentMenu = null;
+
+      let authorized = true; 
+     
+      let currentUser = null; // { nickname, balance, isAdmin, isBanker }
+
+      const tg = window.Telegram.WebApp;
+      tg.expand();
+
+      const user = tg.initDataUnsafe.user;
+      const initData = tg.initData;
+      
+        checkSession();
+
+        async function checkSession() {
+        const res = await fetch('/api/profile', {
+            credentials: 'include'
+        });
+
+        if (res.status === 401) {
+            showAuthModal();
+        } else {
+            const data = await res.json();
+            currentUser = data.user;
+            updateUIForRole();
+            updateUIForUser();
+        }
+        }
+
+      
+      function showAuthModal() {
+        authModal.style.display = "flex";
+        overlay.classList.add("show");
+      }
+
+      function closeAuthModal() {
+        authModal.style.display = "none";
+        overlay.classList.remove("show");
+      }
+
+      function showAuthModalStatus(message) {
+        authModalStatus.textContent = message;
+        authModalStatus.style.display = "block";
+      }
+
+      authLoginButton.addEventListener("click", async () => {
+        const nickname = authUsernameInput.value.trim();
+        const password = authPasswordInput.value.trim();
+
+        if (!nickname || !password) {
+          showAuthModalStatus("Пожалуйста, заполните все поля.");
+          return;
+        }
+
+        const response = await fetch("/api/login", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({nickname, password}),
+            });
+        const data = await response.json();
+        if (response.ok) {
+          currentUser = data.user;
+          authorized = true;
+          updateUIForUser();
+          updateUIForRole();
+          closeAuthModal();
+        } else {
+          console.log(data.message || "Ошибка входа");
+          showAuthModalStatus(data.message);
+        }
+      });
+
+      authRegButton.addEventListener("click", async () => {
+        const nickname = authUsernameInput.value.trim();
+        const password = authPasswordInput.value.trim();
+
+        if (!nickname || !password) {
+          showAuthModalStatus("Пожалуйста, заполните все поля.");
+          return;
+        }
+
+        const response = await fetch("/api/register", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({nickname, password}),
+            });
+        const data = await response.json();
+        if (response.ok) {
+          currentUser = data.user;
+          authorized = true;
+          updateUIForUser();
+          updateUIForRole();
+          closeAuthModal();
+        } else {
+          console.log(data.message || "Ошибка регистрации");
+          showAuthModalStatus(data.message);
+        }
+      });
+
+      exitBtn.addEventListener("click", async () => {
+        const res = await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (res.ok) {
+            currentUser = null;
+            authorized = false;
+            closeAuthModal();
+            closeAllPages();
+            closeMenu();
+            showAuthModal();
+        } else {
+            console.log("Ошибка выхода");
+        }
+      });
+
+      function updateUIForUser() {
+        if (currentUser) {
+          cardBalanceSpan.textContent = `${currentUser.balance} аб`;
+          cardNumberSpan.textContent = currentUser.cardNumber || "Не указано";
+          cardHolderSpan.textContent = currentUser.nickname || "Не указано";
+          cardTelegramIdSpan.textContent = currentUser.telegramId || "Не указано";
+        } else {
+          cardBalanceSpan.textContent = "0 аб";
+          cardNumberSpan.textContent = "Не указано";
+          cardHolderSpan.textContent = "Не указано";
+          cardTelegramIdSpan.textContent = "Не указано";
+        }
+      }
+
+      function updateUIForRole() {
+        if (currentUser.isAdmin) {
+          bankManagmentBtn.style.display = "flex";
+          bankTransactionsBtn.style.display = "flex";
+          addBankerBtn.style.display = "flex";
+          removeBankerBtn.style.display = "flex";
+        } else if (currentUser.isBanker) {
+          bankManagmentBtn.style.display = "flex";
+          bankTransactionsBtn.style.display = "flex";
+          addBankerBtn.style.display = "none";
+          removeBankerBtn.style.display = "none";
+        } else {
+          bankManagmentBtn.style.display = "none";
+          bankTransactionsBtn.style.display = "none";
+        }
+      }
+
+    async function loadTransactions(parent, endpoint) {
+        parent.innerHTML = ''; // Очистка списка транзакций
+        try {
+            const res = await fetch(endpoint, { credentials: 'include' });
+            if (!res.ok) {
+                parent.innerHTML = '<div class="error">Ошибка загрузки транзакций</div>';
+                return;
+            }
+            data = await res.json();
+            console.log(data); 
+            if (data === undefined) {
+                parent.innerHTML = '<div class="error">Нет данных о транзакциях</div>';
+                return;
+            }
+            if (data.length === 0) {
+                parent.innerHTML = '<div class="info">Транзакций нет</div>';
+                return;
+            }
+            data.forEach(tx => {
+                const sender = tx.sender || { nickname: "-", cardNumber: "-" };
+                const senderString = `<div>
+                        <span class="transaction-sender">${sender.nickname}</span>
+                        <span class="transaction-card-number">${sender.cardNumber}</span>
+                    </div>`;
+                
+                const receiver = tx.receiver || { nickname: "-", cardNumber: "-" };
+                const receiverString = `<div>
+                        <span class="transaction-receiver">${receiver.nickname}</span>
+                        <span class="transaction-card-number">${receiver.cardNumber}</span>
+                    </div>`;
+
+                const color = tx.type === "DEPOSIT" ? "#4CAF50" : tx.type === "WITHDRAWAL" ? "#F44336" : "white";
+
+                const item = `<div class="transaction-item">
+                    <span class="transaction-id">#${tx.id}</span>
+                    <span class="transaction-type">${tx.type}</span>
+                    <span class="transaction-amount" style="color: ${color};">${tx.amount} аб</span>
+                    <span class="transaction-date">${tx.createdAt}</span>
+                    ${senderString}
+                    ${receiverString}
+                </div>`;
+                parent.innerHTML += item;
+            });
+        } catch (e) {
+            parent.innerHTML = '<div class="error">Ошибка загрузки</div>';
+            console.error("Ошибка загрузки транзакций:", e);
+        }
+    }
+    
+      function toggleMenu() {
+        if (menuOpened) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      }
+
+      function openMenu() {
+        sideMenu.classList.add("open");
+        overlay.classList.add("show");
+        menuOpened = true;
+      }
+
+      function closeMenu() {
+        sideMenu.classList.remove("open");
+        overlay.classList.remove("show");
+        menuOpened = false;
+      }
+
+      function closeAllPages() {
+        welcomeDiv.style.display = "none";
+        bankPage.style.display = "none";
+        bankManagementPage.style.display = "none";
+        bankTransactionsPage.style.display = "none";
+        document.body.classList.remove("body-gray");
+      }
+
+      function closeTwoInputsModal() {
+        cardOpModal.style.display = "none";
+        cardOpModalInput1.value = "";
+        cardOpModalInput2.value = "";
+        cardOpModalStatus.style.display = "none";
+        overlay.classList.remove("show");
+      }
+
+      function closeSingleInputModal() {
+        cardOpSecModal.style.display = "none";
+        cardOpSecModalInput.value = "";
+        cardOpSecModalStatus.style.display = "none";
+        overlay.classList.remove("show");
+      }
+      
+      function showTwoInputsModal(title, placeholder1, placeholder2, buttonText, callback) {
+      cardOpModalTitle.textContent = title;
+      cardOpModalInput1.placeholder = placeholder1;
+      cardOpModalInput2.placeholder = placeholder2;
+      cardOpModalButton.textContent = buttonText;
+
+      cardOpModal.style.display = "flex";
+      overlay.classList.add("show");
+
+      cardOpModalButton.onclick = () => {
+        callback(cardOpModalInput1.value, cardOpModalInput2.value);
+      };
+      }
+
+      function showTwoInputModalStatus(status) {
+        cardOpModalStatus.textContent = status;
+        cardOpModalStatus.style.display = "block";
+      }
+
+      cardOpModal.addEventListener("click", (e) => {
+        if (e.target === cardOpModal)
+          closeTwoInputsModal();
+      });
+
+      function showSingleInputModal(title, placeholder, buttonText, callback) {
+        cardOpSecModalTitle.textContent = title;
+        cardOpSecModalInput.placeholder = placeholder;
+        cardOpSecModalButton.textContent = buttonText;
+
+        cardOpSecModal.style.display = "flex";
+        overlay.classList.add("show");
+
+        cardOpSecModalButton.onclick = () => {
+          callback(cardOpSecModalInput.value);
+        };
+      }
+
+      function showSingleInputModalStatus(status) {
+        cardOpSecModalStatus.textContent = status;
+        cardOpSecModalStatus.style.display = "block";
+      }
+
+      cardOpSecModal.addEventListener("click", (e) => {
+         if (e.target === cardOpSecModal)
+          closeSingleInputModal();
+      });
+
+      cardSendBtn.addEventListener("click", () => {
+        showTwoInputsModal(
+          "Перевод по карте",
+          "Введите номер карты получателя",
+          "Введите сумму перевода",
+          "Отправить",
+          async (cardNumber, value) => {
+            if (!currentUser) return;
+            const receiverCardNumber = cardNumber.trim();
+            const amount = parseInt(value, 10);
+
+            if (!cardNumber || !amount || amount <= 0) {
+                showResult('Введите корректные данные для перевода.', true);
+                return;
+            }
+            const data = await apiCall('/api/player/transfer', 'POST', {
+                senderCardNumber: currentUser.cardNumber,
+                receiverCardNumber,
+                amount
+            });
+            if (data) {
+                showTwoInputModalStatus(data.message);
+                if (data.senderBalance !== undefined) {
+                    currentUser.balance = data.senderBalance;
+                    updateUIForUser();
+                }
+            }
+          }
+        );
+      });
+
+      cardDepositBtn.addEventListener("click", () => {
+        showTwoInputsModal(
+          "Пополнение карты",
+          "Введите номер карты для пополнения",
+          "Введите сумму пополнения",
+          "Пополнить",
+          async (cardNumber, amount) => {
+             if (!currentUser || !currentUser.isBanker) return;
+              const targetCardNumber = cardNumber.trim();
+              amount = parseInt(amount, 10);
+              const data = await apiCall('/api/banker/deposit', 'POST', {
+                  bankerCardNumber: currentUser.cardNumber,
+                  targetCardNumber,
+                  amount
+              });
+              if (data) {
+                  showTwoInputModalStatus(data.message);
+                  // Если пополняли себе, обновить баланс
+                  if (targetCardNumber == currentUser.cardNumber && data.message.includes("New balance")) {
+                      currentUser.balance = parseInt(data.message.split(": ")[1]);
+                      updateUIForUser();
+                  }
+              }
+          }
+        );
+      });
+
+      cardWithdrawBtn.addEventListener("click", () => {
+        showTwoInputsModal(
+          "Забор с карты",
+          "Введите номер карты для забора",
+          "Введите сумму забора",
+          "Забрать",
+          async (cardNumber, amount) => {
+            if (!currentUser || !currentUser.isBanker) return;
+            const targetCardNumber = cardNumber.trim();
+            amount = parseInt(amount, 10);
+            const data = await apiCall('/api/banker/withdraw', 'POST', {
+                bankerCardNumber: currentUser.cardNumber,
+                targetCardNumber,
+                amount
+            });
+            if (data) {
+                showTwoInputModalStatus(data.message);
+                // Если отнимали у себя, обновить баланс
+                if (targetCardNumber == currentUser.cardNumber && data.message.includes("New balance")) {
+                    currentUser.balance = parseInt(data.message.split(": ")[1]);
+                    updateUIForUser();
+                }
+            }
+          }
+        );
+      });
+
+      addBankerBtn.addEventListener("click", () => {
+        showSingleInputModal(
+          "Назначить банкира",
+          "Введите ID карты игрока",
+          "Назначить",
+          async (cardNumber) => {
+            if (!currentUser || !currentUser.isAdmin) return;
+            const targetCardNumber = cardNumber.trim();
+            console.log(targetCardNumber);
+            const data = await apiCall('/api/admin/add-banker', 'POST', {
+                adminCardNumber: currentUser.cardNumber,
+                targetCardNumber
+            });
+            if (data) {
+                showSingleInputModalStatus(data.message);
+                // Если текущий пользователь стал банкиром, обновить его состояние
+                if (targetCardNumber == currentUser.cardNumber) {
+                    currentUser.isBanker = true;
+                    updateUIForRole();
+                } 
+               }
+              }
+        );
+      });
+
+      removeBankerBtn.addEventListener("click", () => {
+        showSingleInputModal(
+          "Уволить банкира",
+          "Введите ID карты игрока",
+          "Уволить",
+          async (cardNumber) => {
+             if (!currentUser || !currentUser.isAdmin) return;
+            const targetCardNumber = cardNumber.trim();
+            const data = await apiCall('/api/admin/remove-banker', 'POST', {
+                adminCardNumber: currentUser.cardNumber,
+                targetCardNumber
+            });
+            if (data) {
+                showSingleInputModalStatus(data.message);
+                // Если с текущего пользователя сняли роль банкира
+                if (targetCardNumber == currentUser.cardNumber) {
+                    currentUser.isBanker = false;
+                    updateUIForRole();
+                }
+              }
+          }
+        );
+      });
+
+      checkBalanceBtn.addEventListener("click", () => {
+        showSingleInputModal(
+          "Проверка баланса",
+          "Введите ID карты игрока",
+          "Проверить",
+          async (cardNumber) => {
+            if (!currentUser || !currentUser.isBanker) return;
+            const targetCardNumber =cardNumber.trim();
+            const data = await apiCall('/api/banker/balance', 'POST', {
+                bankerCardNumber: currentUser.cardNumber,
+                targetCardNumber
+            });
+            if (data) {
+                showSingleInputModalStatus(`Баланс ${data.cardNumber}: ${data.balance}`);
+              }
+          }
+        );
+      });
+  
+      
+
+      hamburgerBtn.addEventListener("click", toggleMenu);
+      overlay.addEventListener("click", closeMenu);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+
+      bankBtn.addEventListener("click", async () => {
+        closeAllPages();
+        bankPage.style.display = "flex";
+        document.body.classList.add("body-gray");
+        await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions");
+        closeMenu();
+      });
+
+      bankManagmentBtn.addEventListener("click", () => {
+        closeAllPages();
+        bankManagementPage.style.display = "flex";
+        document.body.classList.add("body-gray");
+        closeMenu();
+      });
+
+      transactionsBtn.addEventListener("click", async () => {
+        closeAllPages();
+        bankTransactionsPage.style.display = "flex";
+        document.body.classList.add("body-gray");
+        await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list");
+        closeMenu();
+      });
+
+
+      logo.addEventListener("click", () => {
+        closeAllPages();
+        welcomeDiv.style.display = "flex";
+        closeMenu();
+      });
+
+      async function apiCall(endpoint, method, body) {
+        try {
+            const response = await fetch(endpoint, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null,
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                console.log(data.message || `Ошибка ${response.status}`, true);
+                return null;
+            }
+            return data;
+        } catch (error) {
+            console.log('API Call Error:', error);
+            return null;
+        }
+      }
+    </script>
+  </body>
 </html>

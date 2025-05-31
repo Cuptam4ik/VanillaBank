@@ -1,15 +1,31 @@
 // server.js
 const express = require('express');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, OperationBy, TransactionType } = require('@prisma/client');
+const crypto = require('crypto');
+const cors = require('cors');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 app.use(express.json()); // Для парсинга JSON тел запросов
 app.use(express.static(path.join(__dirname, 'public'))); // Сервируем статику
+
+app.use(session({
+    secret: 'NZehHqz2KQywsVMnksisrC6KXfuw4xuBFOTFXbdSvxp0pBnOlCi5dilemppSX2YO',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // true в продакшене с HTTPS
+        httpOnly: true,
+        maxAge: SESSION_DURATION
+    }
+}));
 
 // Helper function to generate a unique 5-digit card number
 async function generateUniqueCardNumber() {
@@ -26,7 +42,8 @@ async function generateUniqueCardNumber() {
       }
     }
     return cardNumber;
-  }
+}
+
 
 // --- Middleware для проверки пользователя ---
 async function findUser(nickname) {
@@ -39,6 +56,22 @@ async function findUserByCardNumber(cardNumber) {
     return prisma.user.findUnique({ where: { cardNumber: parseInt(cardNumber) } });
 }
 
+async function findUserById(userId) {
+    return prisma.user.findUnique({ where: { id: parseInt(userId) } });
+}
+
+async function createTransaction({ senderCardNumber, receiverCardNumber, amount, type, operationBy }) {
+    return prisma.transaction.create({
+        data: {
+            senderCardNumber: senderCardNumber ? parseInt(senderCardNumber) : null,
+            receiverCardNumber: receiverCardNumber ? parseInt(receiverCardNumber) : null,
+            amount: parseInt(amount),
+            type: type,
+            operationBy: operationBy,
+        }
+    });
+}
+
 // --- Роуты ---
 
 // Главная страница - отдает HTML
@@ -48,29 +81,91 @@ app.get('/', (req, res) => {
 
 // "Логин" - просто проверяет/создает пользователя и возвращает его данные
 app.post('/api/login', async (req, res) => {
-    const { nickname } = req.body;
-    if (!nickname) {
-        return res.status(400).json({ message: 'Nickname is required' });
+    const { nickname, password } = req.body;
+
+    if (!nickname || !password) {
+        return res.status(400).json({ message: 'Nickname and password are required' });
     }
 
     try {
-        let user = await prisma.user.findUnique({ where: { nickname: nickname } });
+        const user = await prisma.user.findUnique({ where: { nickname } });
+
         if (!user) {
-            const newCardNumber = await generateUniqueCardNumber();
-            user = await prisma.user.create({
-                data: { cardNumber: newCardNumber, nickname: nickname, balance: 100 }
-            });
-            return res.status(201).json({ message: 'New user created', user });
+            return res.status(404).json({ message: 'Пользователь не найден!' });
         }
-        res.json({ message: 'User logged in', user });
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(401).json({ message: 'Введены неверные данные!' });
+        }
+
+        req.session.userId = user.id;
+        return res.json({ message: 'Login successful', user });
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ message: 'Server error during login' });
     }
 });
 
+app.post('/api/register', async (req, res) => {
+    const { nickname, password } = req.body;
+
+    if (!nickname || !password) {
+        return res.status(400).json({ message: 'Nickname and password are required' });
+    }
+
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { nickname } });
+
+        if (existingUser) {
+            return res.status(400).json({ message: 'Данное имя пользователя уже занято!' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newCardNumber = await generateUniqueCardNumber();
+
+        const user = await prisma.user.create({
+            data: { cardNumber: newCardNumber, nickname, password: hashedPassword }
+        });
+
+        req.session.userId = user.id;
+        return res.status(201).json({ message: 'Registration successful', user });
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({ message: 'Server error during registration' });
+    }
+});
+
+async function userAuth(req, res, next) {
+    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+    next();
+}
+
+app.get('/api/profile', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Session expired' });
+  }
+  const user = await findUserById(req.session.userId);
+  if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+  return res.json({ message: 'Profile accessed', user: user });
+});
+
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error("Logout error:", err);
+            return res.status(500).json({ message: 'Failed to log out' });
+        }
+        res.clearCookie('connect.sid'); // Очистка cookie сессии
+        res.json({ message: 'Logged out successfully' });
+    });
+});
+
 // --- Функции игрока ---
-app.post('/api/player/transfer', async (req, res) => {
+app.post('/api/player/transfer', userAuth, async (req, res) => {
     const { senderCardNumber, receiverCardNumber, amount } = req.body;
     const transferAmount = parseInt(amount, 10);
 
@@ -104,6 +199,16 @@ app.post('/api/player/transfer', async (req, res) => {
             });
         });
         const updatedSender = await findUserByCardNumber(senderCardNumber);
+
+        // Создаем транзакцию для перевода
+        await createTransaction({
+            senderCardNumber: senderCardNumber,
+            receiverCardNumber: receiverCardNumber,
+            amount: transferAmount,
+            type: TransactionType.TRANSFER,
+            operationBy: OperationBy.PLAYER
+        });
+
         res.json({ message: `Transferred ${transferAmount} to ${receiverCardNumber}`, senderBalance: updatedSender.balance });
     } catch (error) {
         console.error("Transfer error:", error);
@@ -111,13 +216,60 @@ app.post('/api/player/transfer', async (req, res) => {
     }
 });
 
+app.get('/api/transaction-list', userAuth, bankerAuth, async (req, res) => {
+    let transactions = await prisma.transaction.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: 0,
+        take: 10,
+        include: {
+            sender: { select: { nickname: true, cardNumber: true } },
+            receiver: { select: { nickname: true, cardNumber: true } }
+        }
+    });
+    console.log("Transactions fetched:", transactions);
+    return res.json(transactions);
+});
+
+app.get('/api/player/transactions', userAuth, async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await findUserById(req.session.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    try {
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                OR: [
+                    { senderCardNumber: user.cardNumber },
+                    { receiverCardNumber: user.cardNumber }
+                ]
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                sender: { select: { nickname: true, cardNumber: true } },
+                receiver: { select: { nickname: true, cardNumber: true } }
+            },
+            skip: 0,
+            take: 10,
+        });
+        console.log("User transactions fetched:", transactions);
+        return res.json(transactions);
+    } catch (error) {
+        console.error("Get transactions error:", error);
+        return res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+});
+
 // --- Функции банкира ---
 // Middleware для проверки, является ли запрашивающий банкиром
 async function bankerAuth(req, res, next) {
-    const { bankerCardNumber } = req.body; // Используем номер карты банкира
-    if (!bankerCardNumber) return res.status(401).json({ message: 'Banker card number required' });
+    if (!req.session.userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const banker = await findUserByCardNumber(bankerCardNumber);
+    const banker = await findUserById(req.session.userId);
     if (!banker || !banker.isBanker) {
         return res.status(403).json({ message: 'Access denied: Not a banker or banker not found' });
     }
@@ -125,7 +277,7 @@ async function bankerAuth(req, res, next) {
     next();
 }
 
-app.post('/api/banker/deposit', bankerAuth, async (req, res) => {
+app.post('/api/banker/deposit', userAuth, bankerAuth, async (req, res) => {
     const { targetCardNumber, amount } = req.body;
     const depositAmount = parseInt(amount, 10);
 
@@ -141,6 +293,15 @@ app.post('/api/banker/deposit', bankerAuth, async (req, res) => {
             where: { cardNumber: parseInt(targetCardNumber) },
             data: { balance: { increment: depositAmount } },
         });
+
+        // Создаем транзакцию для депозита
+        await createTransaction({
+            receiverCardNumber: targetCardNumber,
+            amount: depositAmount,
+            type: TransactionType.DEPOSIT,
+            operationBy: OperationBy.BANK
+        });
+
         res.json({ message: `Deposited ${depositAmount} to ${targetCardNumber}. New balance: ${updatedUser.balance}` });
     } catch (error) {
         console.error("Deposit error:", error);
@@ -148,8 +309,8 @@ app.post('/api/banker/deposit', bankerAuth, async (req, res) => {
     }
 });
 
-app.post('/api/banker/withdraw', bankerAuth, async (req, res) => {
-    const { targetCardNumber } = req.body;
+app.post('/api/banker/withdraw', userAuth, bankerAuth, async (req, res) => {
+    const { targetCardNumber, amount } = req.body;
     const withdrawAmount = parseInt(amount, 10);
 
     if (!targetCardNumber || !withdrawAmount || withdrawAmount <= 0) {
@@ -157,7 +318,9 @@ app.post('/api/banker/withdraw', bankerAuth, async (req, res) => {
     }
 
     try {
-        const targetUser = await findUserByCardNumber(targetCardNumber);
+        const targetUser = await prisma.user.findUnique({
+            where: { cardNumber: parseInt(targetCardNumber) },
+        });
         if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
 
         if (targetUser.balance < withdrawAmount) {
@@ -168,6 +331,16 @@ app.post('/api/banker/withdraw', bankerAuth, async (req, res) => {
             where: { cardNumber: parseInt(targetCardNumber) },
             data: { balance: { decrement: withdrawAmount } },
         });
+
+        // Создаем транзакцию для снятия средств
+        await createTransaction({
+            senderCardNumber: targetCardNumber,
+            amount: withdrawAmount,
+            type: TransactionType.WITHDRAWAL,
+            operationBy: OperationBy.BANK,
+
+        });
+
         res.json({ message: `Withdrew ${withdrawAmount} from ${targetCardNumber}. New balance: ${updatedUser.balance}` });
     } catch (error) {
         console.error("Withdraw error:", error);
@@ -175,7 +348,7 @@ app.post('/api/banker/withdraw', bankerAuth, async (req, res) => {
     }
 });
 
-app.post('/api/banker/balance', bankerAuth, async (req, res) => {
+app.post('/api/banker/balance', userAuth, bankerAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
     if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
 
@@ -193,10 +366,9 @@ app.post('/api/banker/balance', bankerAuth, async (req, res) => {
 // --- Функции админа ---
 // Middleware для проверки, является ли запрашивающий админом
 async function adminAuth(req, res, next) {
-    const { adminCardNumber } = req.body; // Используем номер карты банкира
-    if (!adminCardNumber) return res.status(401).json({ message: 'Banker card number required' });
+    if (!req.session.userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const admin = await findUserByCardNumber(adminCardNumber);
+    const admin = await findUserById(req.session.userId);
     if (!admin || !admin.isAdmin) {
         return res.status(403).json({ message: 'Access denied: Not an admin or admin not found' });
     }
@@ -204,7 +376,7 @@ async function adminAuth(req, res, next) {
     next();
 }
 
-app.post('/api/admin/add-banker', adminAuth, async (req, res) => {
+app.post('/api/admin/add-banker', userAuth, adminAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
     if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
 
@@ -227,7 +399,7 @@ app.post('/api/admin/add-banker', adminAuth, async (req, res) => {
     }
 });
 
-app.post('/api/admin/remove-banker', adminAuth, async (req, res) => {
+app.post('/api/admin/remove-banker', userAuth, adminAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
     if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
 
