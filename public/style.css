@@ -3,13 +3,18 @@
         height: 100%;
         margin: 0;
         padding: 0;
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+      html, input, button {
         font-family: "Ubuntu", sans-serif;
         font-weight: 500;
       }
       body {
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
+        height: 100vh;
+        
         background: url("images/background.jpg") no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
@@ -25,6 +30,7 @@
         box-sizing: border-box;
         border-bottom: 1px solid rgba(255, 255, 255, 0.138);
         z-index: 10;
+        min-height: 4rem;
       }
       .navbar .logo {
         font-size: 1.5rem;
@@ -68,7 +74,7 @@
         background: #dfdfdf;
       }
       .side-menu.exit {
-        color: #FB4848;
+        color: #EA4242;
       }
       .overlay {
         display: none;
@@ -87,13 +93,10 @@
         backdrop-filter: blur(5px) opacity(1);
       }
       .main-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
         flex-grow: 1;
         padding: 16px;
         overflow-y: auto;
+        overflow-x: hidden;
       }
       .centered-div {
         font-size: 2rem;
@@ -143,10 +146,15 @@
         width: 100%;
       }
 
+      .bank-personal-transactions{
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
       #bank-management-page {
         display: none;
         gap: 4rem;
-        height: 100%;
         width: 100%;
         align-items: start;
         justify-content: space-between;
@@ -166,7 +174,7 @@
         width: 100%;
       }
       .card {
-        border-radius: 2rem;
+        border-radius: 1rem;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         color: #ffffff;
         max-width: 500px;
@@ -174,7 +182,8 @@
         aspect-ratio: 1.6;
         display: flex;
         flex-direction: column;
-        background-color: #FB4848;
+        background-color: #EA4242;
+        border: 1px solid #ffffff2c;
       }
       .card .card-header {
         display: flex;
@@ -198,19 +207,31 @@
       }
       .card #card-balance {
         font-size: 2rem;
+        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
       }
       .card #card-number {
         font-size: 1.25rem;
+        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
       }
+
+      .card .card-balance-div{
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
       .card #card-holder {
         font-size: 1.5rem;
-      }
-      .card #card-telegram-id {
-        font-size: 1.25rem;
+        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
       }
       .card #card-edit-btn {
         cursor: pointer;
         display: block;
+        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
+      }
+
+      .shadow-icon {
+        filter: drop-shadow(0px 1px 5px rgba(0, 0, 0, 0.114));
       }
 
       .body-gray {
@@ -221,6 +242,7 @@
       .filler {
         flex-grow: 1;
       }
+
 
       button{
         padding: 1rem 1.5rem;
@@ -244,10 +266,9 @@
       button.action {
         background-color: #151519;
         color: #ffffff;
-        border: #585858 1px solid;
+        border: #404042 1px solid;
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 1rem;
         transition: transform 0.2s, background-color 0.2s;
       }
@@ -315,12 +336,12 @@
         font-size: 1rem;
       }
       .modal-button {
-        background-color: #FB4848;
+        background-color: #EA4242;
         color: #ffffff;
         border: none;
       }
       .modal-button:hover {
-        background-color: #e03e3e;
+        background-color: #ce3c3c;
       }
       .modal-status {
         display: none;
@@ -338,13 +359,13 @@
         flex-direction: column;
         align-items: stretch;
         width: 100%;
-        background-color: #1d1d23;
-        border: 1px solid #2e2e32;
-        border-radius: 1rem;
+        margin-bottom: 1rem;
+        overflow-x: auto;
       }
 
       .transaction-page-title{
         margin: 0;
+        font-size: 1.5rem;
       }
 
       .transaction-item {
@@ -352,13 +373,21 @@
         gap: 1rem;
         font-size: 1rem;;
         justify-content: space-between;
-        border-bottom: 1px solid #2e2e32;;
         align-items: center;
         padding: 1rem;
+        background-color: #151519;
+        border: 1px solid #2e2e32;
+        border-top: none;
+        min-width: 60rem;
       }
-
+      
+      .transaction-item:nth-child(1) {
+        background-color: #1d1d23;
+        border-radius: 1rem 1rem 0 0;
+        border: 1px solid #2e2e32;
+      }
       .transaction-item:nth-last-child(1) {
-          border-bottom: none;  
+        border-radius: 0 0 1rem 1rem;  
     }
 
       .transaction-item div {
@@ -368,7 +397,7 @@
         flex: 1;
       }
 
-        .transaction-item span {
+      .transaction-item span {
         flex: 1;
       }
 
@@ -402,7 +431,7 @@
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
             width: fit-content; /* Ширина по содержимому */
             margin-top: 10px; /* Отступ от кнопки */
-            border: 1px solid #585858; /* Граница как у кнопок */
+            border: #404042 1px solid; /* Граница как у кнопок */
         }
         .color-picker-modal.visible {
             opacity: 1;
@@ -416,11 +445,11 @@
             cursor: pointer;
             padding: 8px 15px; /* Увеличенный padding для лучшей области нажатия */
             border-radius: 8px;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.1s ease;
             min-width: 120px; /* Минимальная ширина для единообразия */
         }
         .color-option:hover {
-            background-color: rgba(255, 255, 255, 0.1); /* Светлый фон при наведении */
+            background-color: rgba(255, 255, 255, 0.05); /* Светлый фон при наведении */
         }
         .color-name {
             color: white; /* Белый цвет текста для темного фона */
@@ -429,22 +458,46 @@
             font-weight: 400; /* Нормальный вес шрифта */
         }
 
+        canvas#stars {
+        position: fixed;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+      }
+
+      a {
+        position: absolute;
+        bottom: 2vmin;
+        right: 2vmin;
+        color: rgba(255,255,255,0.1);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #fff;
+      }
+
+      .row-center {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
       @media (max-width: 600px) {
         .navbar {
           background-color: #0D0D11;
           backdrop-filter: none;
-          border-bottom: none;
+          border-bottom: #1d1d23 1px solid;
         }
         .overlay {
-          display: none;
-        }
-        .overlay.show {
-          display: none;
+          top: 4rem;
         }
         .side-menu {
-          position: relative;
+          position: fixed;
+          top: 3.9rem;
           width: 100%;
-          padding: 64px 12px 12px 12px;
+          height: 20rem;
+          padding: 1rem;
           display: none;
           border-bottom: #1d1d23 1px solid;
           border-left: none;
@@ -453,18 +506,16 @@
           display: flex;
         }
         body {
-          height: auto;
           overflow: auto;
+        }
+
+        .main-content{
+            overflow-y: auto;
         }
 
         #bank-page {
           flex-direction: column;
           align-items: center;
-        }
-
-        .transaction-list{
-          width: 100%;
-          overflow-x: auto;
         }
 
         .bank-personal-transactions {
@@ -474,12 +525,18 @@
 
         .bank-operations {
           gap: 1rem;
+          align-items: stretch;
         }
 
-        .color-picker-modal {
-            width: 80%; /* Ширина модального окна на мобильных */
-            top: 200px; /* Позиционирование на мобильных */
-            left: 50%;
-            transform: translateX(-50%);
+        .card {
+          width: 100%;
+          max-width: 100%;
+        }
+        
+        #bank-management-page{
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: start;
+          gap: 1rem;
         }
       }

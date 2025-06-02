@@ -88,7 +88,7 @@
           <div class="color-option" data-color="#4DD0E1" data-gradient-end="#00BCD4">
               <span class="color-name">Бирюзовый</span>
           </div>
-          <div class="color-option" data-color="#E0E0E0" data-gradient-end="#BDBDBD">
+          <div class="color-option" data-color="#606160" data-gradient-end="#525252">
               <span class="color-name">Серый</span>
           </div>
           <div class="color-option" data-color="#FF9800" data-gradient-end="#F57C00">
@@ -120,18 +120,22 @@
           <div class="additional-info">play.bixland.ru 1.21.4+</div>
       </div>
       <div id="bank-page">
+        <canvas id="stars"></canvas>
         <div class="bank-main">
           <div class="card" id="card">
             <div class="card-header">
                 <span id="card-holder">Mr. Test</span>
                 <div class="filler"></div>
                 <span id="card-edit-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="shadow-icon"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
                 </span>
             </div>
             <div class="card-body"></div>
             <div class="card-footer">
-              <span id="card-balance">1000 аб</span>
+              <div class="card-balance-div">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512" class="shadow-icon"><path fill="currentColor" d="M440.9 136.3a4 4 0 0 0 0-6.91L288.16 40.65a64.14 64.14 0 0 0-64.33 0L71.12 129.39a4 4 0 0 0 0 6.91L254 243.88a4 4 0 0 0 4.06 0ZM54 163.51a4 4 0 0 0-6 3.49v173.89a48 48 0 0 0 23.84 41.39L234 479.51a4 4 0 0 0 6-3.46V274.3a4 4 0 0 0-2-3.46ZM272 275v201a4 4 0 0 0 6 3.46l162.15-97.23A48 48 0 0 0 464 340.89V167a4 4 0 0 0-6-3.45l-184 108a4 4 0 0 0-2 3.45"/></svg>
+                    <span id="card-balance"> 1000 аб</span>
+              </div>
               <span id="card-number">12343</span>
             </div>
           </div>
@@ -146,7 +150,10 @@
         </div>
         </div>
         <div class="bank-personal-transactions">
-            <h2 class="transaction-title">Ваши транзакции:</h2>
+            <h3 class="transaction-page-title row-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13.26 3C8.17 2.86 4 6.95 4 12H2.21c-.45 0-.67.54-.35.85l2.79 2.8c.2.2.51.2.71 0l2.79-2.8a.5.5 0 0 0-.36-.85H6c0-3.9 3.18-7.05 7.1-7c3.72.05 6.85 3.18 6.9 6.9c.05 3.91-3.1 7.1-7 7.1c-1.61 0-3.1-.55-4.28-1.48a.994.994 0 0 0-1.32.08c-.42.42-.39 1.13.08 1.49A8.86 8.86 0 0 0 13 21c5.05 0 9.14-4.17 9-9.26c-.13-4.69-4.05-8.61-8.74-8.74m-.51 5c-.41 0-.75.34-.75.75v3.68c0 .35.19.68.49.86l3.12 1.85c.36.21.82.09 1.03-.26c.21-.36.09-.82-.26-1.03l-2.88-1.71v-3.4c0-.4-.34-.74-.75-.74"/></svg>
+              <span>История операций</span>
+            </h2>
             <div id="personal-transaction-list" class="transaction-list">
             </div>
         </div>
@@ -154,7 +161,7 @@
        <div id="bank-management-page" style="display: none;">
            <button id="check-balance-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/></svg>
-            Посмотреть баланс</button>
+            <span>Посмотреть баланс</span></button>
            <button id="card-deposit-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 20H9v-8H4.16L12 4.16L19.84 12H15z"/></svg>
             Пополнить</button>
@@ -380,7 +387,7 @@
         }
       }
 
-    async function loadTransactions(parent, endpoint) {
+    async function loadTransactions(parent, endpoint, personal) {
         parent.innerHTML = ''; // Очистка списка транзакций
         try {
             const res = await fetch(endpoint, { credentials: 'include' });
@@ -398,26 +405,69 @@
                 parent.innerHTML = '<div class="info">Транзакций нет</div>';
                 return;
             }
+            parent.innerHTML += `<div class="transaction-item">
+                    ${ personal ? "" : "<span>ID</span>" }
+                    <span>Тип операции</span>
+                    <span>Количество</span>
+                    <span>Дата и время</span>
+                    <span>Отправитель</span>
+                    <div></div>
+                    <span>Получатель</span>
+                </div>`;
+
             data.forEach(tx => {
-                const sender = tx.sender || { nickname: "-", cardNumber: "-" };
-                const senderString = `<div>
+                const bankSvg = `<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M7.292 1.712c.418-.32.999-.32 1.417 0l4.962 3.793c.632.483.293 1.491-.501 1.495H2.83c-.793-.004-1.133-1.012-.5-1.495zM8 5.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5M3.5 8v3H5V8zM6 8v3h1.5V8zm2.5 0v3H10V8zM11 8v3h1.5V8zm-9 5.25c0-.69.56-1.25 1.25-1.25h9.5c.69 0 1.25.56 1.25 1.25v.25a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5z"/></svg></div>`;
+                const arrowSvg = `<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.16L18.24 6.4v4.24H0v3.04h18.24v4.24z"/></svg></div>`;
+                
+                if(tx.sender !== null && tx.sender.nickname === currentUser.nickname) {
+                    tx.sender.nickname = "Вы";
+                }
+                if(tx.receiver !== null && tx.receiver.nickname === currentUser.nickname) {
+                    tx.receiver.nickname = "Вы";
+                }
+                
+                const sender = tx.sender || null;
+                const senderString = sender !== null ? `<div>
                         <span class="transaction-sender">${sender.nickname}</span>
                         <span class="transaction-card-number">${sender.cardNumber}</span>
-                    </div>`;
+                    </div>` : bankSvg;
                 
-                const receiver = tx.receiver || { nickname: "-", cardNumber: "-" };
-                const receiverString = `<div>
+                const receiver = tx.receiver || null;
+                const receiverString = receiver !== null ? `<div>
                         <span class="transaction-receiver">${receiver.nickname}</span>
                         <span class="transaction-card-number">${receiver.cardNumber}</span>
-                    </div>`;
+                    </div>` : bankSvg;
 
-                const color = tx.type === "DEPOSIT" ? "#4CAF50" : tx.type === "WITHDRAWAL" ? "#F44336" : "white";
+
+                const idString = personal ? "" : `<span>${tx.id}</span>`
+                let color = tx.type === "DEPOSIT" ? "#4CAF50" : tx.type === "WITHDRAWAL" ? "#F44336" : "white";
+                let amount = tx.amount;
+                if(tx.type === "TRANSFER" && personal) {
+                  if(tx.sender.nickname === "Вы"){
+                       amount = "-" + amount;
+                      color = "#F44336"; 
+                  }
+                  else {
+                    amount = "+" + amount;
+                     color = "#4CAF50";
+                  }
+                }
+                else if(tx.type === "DEPOSIT"){
+                    amount = "+" + amount;
+                    color = "#4CAF50";
+                }
+                else if(tx.type === "WITHDRAWAL"){
+                    amount = "-" + amount;
+                    color = "#F44336";
+                }
 
                 const item = `<div class="transaction-item">
+                    ${idString}
                     <span class="transaction-type">${getLocaleTransactionType(tx.type)}</span>
-                    <span class="transaction-amount" style="color: ${color};">${tx.amount} аб</span>
+                    <span class="transaction-amount" style="color: ${color};">${amount} аб</span>
                     <span class="transaction-date">${formatDateTimeWithoutSeconds(tx.createdAt)}</span>
                     ${senderString}
+                    ${arrowSvg}
                     ${receiverString}
                 </div>`;
                 parent.innerHTML += item;
@@ -683,7 +733,7 @@
         closeAllPages();
         bankPage.style.display = "flex";
         document.body.classList.add("body-gray");
-        await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions");
+        await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
         closeMenu();
       });
 
@@ -785,8 +835,14 @@
           console.log("lok");
           e.stopPropagation(); // Предотвращаем всплытие события, чтобы не закрыть модальное окно сразу
           colorPickerModal.classList.toggle('visible'); // Переключаем видимость модального окна
-          colorPickerModal.style.left = `${e.clientX}px`; // Устанавливаем позицию модального окна по X
+          console.log(e.clientX + colorPickerModal.clientWidth > window.innerWidth);
+          if(e.clientX + colorPickerModal.clientWidth > window.innerWidth){
+            colorPickerModal.style.left = `${e.clientX - colorPickerModal.clientWidth - 8}px`; // Устанавливаем позицию модального окна по X
+          } else {
+                colorPickerModal.style.left = `${e.clientX}px`; // Устанавливаем позицию модального окна по X
+          }
           colorPickerModal.style.top = `${e.clientY}px`; // Устанавливаем позицию модального окна по Y
+          
       });
 
       // Обработчик события для каждого варианта цвета
@@ -807,8 +863,9 @@
           }
       });
 
-
+      const starsCanvas = document.getElementById("stars");
 
     </script>
+    <script src="stars.js"></script>
   </body>
 </html>
