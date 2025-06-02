@@ -84,7 +84,7 @@ app.post('/api/login', async (req, res) => {
     const { nickname, password } = req.body;
 
     if (!nickname || !password) {
-        return res.status(400).json({ message: 'Nickname and password are required' });
+        return res.status(400).json({ message: 'Введите никнейм и пароль' });
     }
 
     try {
@@ -104,7 +104,7 @@ app.post('/api/login', async (req, res) => {
         return res.json({ message: 'Login successful', user });
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({ message: 'Server error during login' });
+        res.status(500).json({ message: 'Ошибка сервера при входе в систему' });
     }
 });
 
@@ -112,7 +112,7 @@ app.post('/api/register', async (req, res) => {
     const { nickname, password } = req.body;
 
     if (!nickname || !password) {
-        return res.status(400).json({ message: 'Nickname and password are required' });
+        return res.status(400).json({ message: 'Введите никнейм и пароль' });
     }
 
     try {
@@ -130,25 +130,25 @@ app.post('/api/register', async (req, res) => {
         });
 
         req.session.userId = user.id;
-        return res.status(201).json({ message: 'Registration successful', user });
+        return res.status(201).json({ message: 'Регистрация завершена успешно!', user });
     } catch (error) {
         console.error("Registration error:", error);
-        res.status(500).json({ message: 'Server error during registration' });
+        res.status(500).json({ message: 'Ошибка сервера при регистрации' });
     }
 });
 
 async function userAuth(req, res, next) {
-    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.session.userId) return res.status(401).json({ error: 'Неавторизованный пользователь!' });
     next();
 }
 
 app.get('/api/profile', async (req, res) => {
   if (!req.session.userId) {
-    return res.status(401).json({ error: 'Session expired' });
+    return res.status(401).json({ error: 'Сеанс истек' });
   }
   const user = await findUserById(req.session.userId);
   if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'Игрок не найден!' });
     }
   return res.json({ message: 'Profile accessed', user: user });
 });
@@ -180,11 +180,11 @@ app.post('/api/player/transfer', userAuth, async (req, res) => {
         const sender = await findUserByCardNumber(senderCardNumber);
         const receiver = await findUserByCardNumber(receiverCardNumber);
 
-        if (!sender) return res.status(404).json({ message: 'Sender not found' });
-        if (!receiver) return res.status(404).json({ message: 'Receiver not found' });
+        if (!sender) return res.status(404).json({ message: 'Отправитель не найден' });
+        if (!receiver) return res.status(404).json({ message: 'Получатель не найден' });
 
         if (sender.balance < transferAmount) {
-            return res.status(400).json({ message: 'Insufficient funds' });
+            return res.status(400).json({ message: 'Недостаточно средств!' });
         }
 
         // Транзакция для атомарности
@@ -212,7 +212,7 @@ app.post('/api/player/transfer', userAuth, async (req, res) => {
         res.json({ message: `Transferred ${transferAmount} to ${receiverCardNumber}`, senderBalance: updatedSender.balance });
     } catch (error) {
         console.error("Transfer error:", error);
-        res.status(500).json({ message: 'Transaction failed' });
+        res.status(500).json({ message: 'Во время транзакции произошла ошибка!' });
     }
 });
 
@@ -271,7 +271,7 @@ async function bankerAuth(req, res, next) {
 
     const banker = await findUserById(req.session.userId);
     if (!banker || !banker.isBanker) {
-        return res.status(403).json({ message: 'Access denied: Not a banker or banker not found' });
+        return res.status(403).json({ message: 'Банкир не найден' });
     }
     req.banker = banker; // Сохраняем банкира в запросе для дальнейшего использования
     next();
@@ -282,12 +282,12 @@ app.post('/api/banker/deposit', userAuth, bankerAuth, async (req, res) => {
     const depositAmount = parseInt(amount, 10);
 
     if (!targetCardNumber || !depositAmount || depositAmount <= 0) {
-        return res.status(400).json({ message: 'Invalid deposit data' });
+        return res.status(400).json({ message: 'Неверные данные о переводе' });
     }
 
     try {
         const targetUser = await findUserByCardNumber(targetCardNumber);
-        if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
+        if (!targetUser) return res.status(404).json({ message: 'Пользователь не найден' });
 
         const updatedUser = await prisma.user.update({
             where: { cardNumber: parseInt(targetCardNumber) },
@@ -305,7 +305,7 @@ app.post('/api/banker/deposit', userAuth, bankerAuth, async (req, res) => {
         res.json({ message: `Deposited ${depositAmount} to ${targetCardNumber}. New balance: ${updatedUser.balance}` });
     } catch (error) {
         console.error("Deposit error:", error);
-        res.status(500).json({ message: 'Deposit failed' });
+        res.status(500).json({ message: 'Во время перевода произошла ошибка!' });
     }
 });
 
@@ -314,17 +314,17 @@ app.post('/api/banker/withdraw', userAuth, bankerAuth, async (req, res) => {
     const withdrawAmount = parseInt(amount, 10);
 
     if (!targetCardNumber || !withdrawAmount || withdrawAmount <= 0) {
-        return res.status(400).json({ message: 'Invalid withdrawal data' });
+        return res.status(400).json({ message: 'Неверные данные!' });
     }
 
     try {
         const targetUser = await prisma.user.findUnique({
             where: { cardNumber: parseInt(targetCardNumber) },
         });
-        if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
+        if (!targetUser) return res.status(404).json({ message: 'Пользователь не найден!' });
 
         if (targetUser.balance < withdrawAmount) {
-            return res.status(400).json({ message: 'Insufficient funds' });
+            return res.status(400).json({ message: 'Недостаточно средств' });
         }
 
         const updatedUser = await prisma.user.update({
@@ -344,17 +344,17 @@ app.post('/api/banker/withdraw', userAuth, bankerAuth, async (req, res) => {
         res.json({ message: `Withdrew ${withdrawAmount} from ${targetCardNumber}. New balance: ${updatedUser.balance}` });
     } catch (error) {
         console.error("Withdraw error:", error);
-        res.status(500).json({ message: 'Withdrawal failed' });
+        res.status(500).json({ message: 'Вывод средств не удался' });
     }
 });
 
 app.post('/api/banker/balance', userAuth, bankerAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
-    if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
+    if (!targetCardNumber) return res.status(400).json({ message: 'Требуется номер карты' });
 
     try {
         const targetUser = await findUserByCardNumber(targetCardNumber);
-        if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
+        if (!targetUser) return res.status(404).json({ message: 'Пользователь не найден' });
 
         res.json({ cardNumber: targetUser.cardNumber, balance: targetUser.balance });
     } catch (error) {
@@ -366,11 +366,11 @@ app.post('/api/banker/balance', userAuth, bankerAuth, async (req, res) => {
 // --- Функции админа ---
 // Middleware для проверки, является ли запрашивающий админом
 async function adminAuth(req, res, next) {
-    if (!req.session.userId) return res.status(401).json({ message: 'Unauthorized' });
+    if (!req.session.userId) return res.status(401).json({ message: 'Неавторизованный пользователь' });
 
     const admin = await findUserById(req.session.userId);
     if (!admin || !admin.isAdmin) {
-        return res.status(403).json({ message: 'Access denied: Not an admin or admin not found' });
+        return res.status(403).json({ message: 'Пользователь не является администратором' });
     }
     req.admin = admin;
     next();
@@ -378,47 +378,47 @@ async function adminAuth(req, res, next) {
 
 app.post('/api/admin/add-banker', userAuth, adminAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
-    if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
+    if (!targetCardNumber) return res.status(400).json({ message: 'Требуется номер карты игрока' });
 
     try {
         const targetUser = await findUserByCardNumber(targetCardNumber);
-        if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
+        if (!targetUser) return res.status(404).json({ message: 'Пользователь не найден' });
 
         if (targetUser.isBanker) {
-            return res.status(400).json({ message: `${targetCardNumber} is already a banker.` });
+            return res.status(400).json({ message: `${targetCardNumber} теперь банкир!.` });
         }
 
         await prisma.user.update({
             where: { cardNumber: parseInt(targetCardNumber) },
             data: { isBanker: true },
         });
-        res.json({ message: `${targetCardNumber} is now a banker.` });
+        res.json({ message: `${targetCardNumber} теперь банкир!.` });
     } catch (error) {
         console.error("Add banker error:", error);
-        res.status(500).json({ message: 'Failed to add banker' });
+        res.status(500).json({ message: 'Произошла ошибка при добавлении банкира' });
     }
 });
 
 app.post('/api/admin/remove-banker', userAuth, adminAuth, async (req, res) => {
     const { targetCardNumber } = req.body;
-    if (!targetCardNumber) return res.status(400).json({ message: 'Target card number required' });
+    if (!targetCardNumber) return res.status(400).json({ message: 'Требуется номер карты' });
 
     try {
         const targetUser = await findUserByCardNumber(targetCardNumber);
-        if (!targetUser) return res.status(404).json({ message: 'Target user not found' });
+        if (!targetUser) return res.status(404).json({ message: 'Пользователь не найден' });
 
         if (!targetUser.isBanker) {
-            return res.status(400).json({ message: `${targetCardNumber} is not a banker.` });
+            return res.status(400).json({ message: `${targetCardNumber} не является банкиром.` });
         }
 
         await prisma.user.update({
             where: { cardNumber: parseInt(targetCardNumber) },
             data: { isBanker: false },
         });
-        res.json({ message: `Banker role removed from ${targetCardNumber}.` });
+        res.json({ message: `Роль банкира была забрана у {targetCardNumber}.` });
     } catch (error) {
         console.error("Remove banker error:", error);
-        res.status(500).json({ message: 'Failed to remove banker' });
+        res.status(500).json({ message: 'Ошибка при удалении банкира' });
     }
 });
 
