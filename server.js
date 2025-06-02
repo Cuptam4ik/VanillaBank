@@ -237,7 +237,7 @@ app.post('/api/player/pay-fine/:fineId', userAuth, async (req, res) => {
             prisma.transaction.create({
                 data: {
                     senderCardNumber: req.user.cardNumber,
-                    receiverCardNumber: null, // Или ID "казны", если есть
+                    receiverCardNumber: 10000, // Или ID "казны", если есть
                     amount: fineToPay.amount,
                     type: TransactionType.FINE,
                     operationBy: OperationBy.PLAYER,
