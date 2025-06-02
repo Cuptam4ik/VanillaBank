@@ -1,0 +1,279 @@
+Cuptam4ik, [02.06.2025 13:33]
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Банковское приложение</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Скрывает прокрутку */
+            font-family: 'Inter', sans-serif; /* Используем шрифт Inter */
+        }
+        /* Удален #vanta-background, так как анимация убрана */
+        .container {
+            width: 100%;
+            max-width: 360px; /* Максимальная ширина для мобильного вида */
+            height: 800px;
+            position: relative;
+            background: #0D0D11; /* Полностью непрозрачный фон, так как Vanta.js удален */
+            overflow: hidden;
+            margin: 0 auto; /* Центрирование контейнера */
+            border-radius: 20px; /* Скругленные углы для контейнера */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Тень для контейнера */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 25px; /* Отступ сверху для контента */
+        }
+        .card-section {
+            width: 323px;
+            height: 202px;
+            /* Начальный градиентный фон */
+            background: linear-gradient(135deg, #EA4242 0%, #C0392B 100%);
+            border-radius: 78px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 40px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            line-height: 64px;
+            word-wrap: break-word;
+            margin-bottom: 30px;
+            position: relative; /* Для позиционирования кнопки редактирования */
+            transition: background 0.5s ease, box-shadow 0.3s ease; /* Плавный переход цвета и тени */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.1); /* Улучшенная тень */
+        }
+        .card-text {
+            position: absolute;
+            left: 49px;
+            top: 35px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Тень для текста */
+        }
+        .edit-card-button {
+            position: absolute;
+            top: 20px; /* Отступ сверху */
+            right: 20px; /* Отступ справа */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%; /* Круглая кнопка */
+            transition: background-color 0.2s ease;
+            z-index: 10; /* Поверх всего */
+        }
+        .edit-card-button:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Легкий фон при наведении */
+        }
+        .edit-card-button svg {
+            display: block; /* Убираем лишнее пространство под SVG */
+        }
+
+.color-picker-modal {
+            position: absolute;
+            top: 250px; /* Позиционируем ниже карты */
+            background: rgba(21, 21, 25, 0.95); /* Темный фон, как у кнопок */
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Более темная тень */
+            display: flex;
+            flex-direction: column; /* Вертикальное расположение */
+            gap: 5px; /* Уменьшенный отступ между элементами */
+            z-index: 20; /* Выше кнопки редактирования */
+            opacity: 0; /* Изначально скрыт */
+            visibility: hidden; /* Изначально скрыт */
+            transform: translateY(-10px); /* Небольшое смещение для анимации */
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            width: fit-content; /* Ширина по содержимому */
+            margin-top: 10px; /* Отступ от кнопки */
+            border: 1px solid #585858; /* Граница как у кнопок */
+        }
+        .color-picker-modal.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .color-option {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Центрируем текст */
+            cursor: pointer;
+            padding: 8px 15px; /* Увеличенный padding для лучшей области нажатия */
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            min-width: 120px; /* Минимальная ширина для единообразия */
+        }
+        .color-option:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Светлый фон при наведении */
+        }
+        .color-name {
+            color: white; /* Белый цвет текста для темного фона */
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400; /* Нормальный вес шрифта */
+        }
+
+        .button-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .action-button {
+            width: 154px;
+            height: 77px;
+            background: #151519;
+            border-radius: 31px;
+            border: 1px #585858 solid;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-family: 'Twinkle Star', cursive;
+            font-weight: 400;
+            line-height: 64px;
+            word-wrap: break-word;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .action-button:hover {
+            background: #2a2a30;
+            transform: translateY(-3px);
+        }
+        .transactions-title {
+            color: white;
+            font-size: 24px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            align-self: flex-start;
+            margin-left: 23px;
+        }
+        /* Адаптивный дизайн */
+        @media (max-width: 400px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .card-section {
+                width: 90%;
+                height: 180px;
+                font-size: 32px;
+            }
+            .edit-card-button {
+                top: 15px;
+                right: 15px;
+            }
+            .color-picker-modal {
+                width: 80%; /* Ширина модального окна на мобильных */
+                top: 200px; /* Позиционирование на мобильных */
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .button-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .action-button {
+                width: 90%;
+            }
+            .transactions-title {
+                margin-left: 5%;
+            }
+        }
+    </style>
+
+<link href="https://fonts.googleapis.com/css2?family=Twinkle+Star&family=Ubuntu:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="card-section" id="cardSection">
+            <div class="card-text">Card</div>
+            <button class="edit-card-button" id="editCardButton">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24px" height="24px">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="color-picker-modal" id="colorPickerModal">
+            <div class="color-option" data-color="#EA4242" data-gradient-end="#C0392B">
+                <span class="color-name">Красный</span>
+            </div>
+            <div class="color-option" data-color="#4287F5" data-gradient-end="#2167D0">
+                <span class="color-name">Синий</span>
+            </div>
+            <div class="color-option" data-color="#4CAF50" data-gradient-end="#388E3C">
+                <span class="color-name">Зеленый</span>
+            </div>
+            <div class="color-option" data-color="#9C27B0" data-gradient-end="#7B1FA2">
+                <span class="color-name">Фиолетовый</span>
+            </div>
+            <div class="color-option" data-color="#4DD0E1" data-gradient-end="#00BCD4">
+                <span class="color-name">Бирюзовый</span>
+            </div>
+            <div class="color-option" data-color="#E0E0E0" data-gradient-end="#BDBDBD">
+                <span class="color-name">Серый</span>
+            </div>
+            <div class="color-option" data-color="#FF9800" data-gradient-end="#F57C00">
+                <span class="color-name">Оранжевый</span>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <div class="action-button">Перевод</div>
+            <div class="action-button">Штраф</div>
+        </div>
+
+        <div class="transactions-title">Ваши транзакции:</div>
+        </div>
+
+    <script>
+        // Удалена переменная vantaBirdsInstance и функция hexToNumber
+
+        // Инициализация Vanta.BIRDS удалена
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Получаем ссылки на элементы
+            const cardSection = document.getElementById('cardSection');
+            const editCardButton = document.getElementById('editCardButton');
+            const colorPickerModal = document.getElementById('colorPickerModal');
+            const colorOptions = document.querySelectorAll('.color-option');
+
+            // Функция для установки градиентного фона карты
+            function setCardGradient(startColor, endColor) {
+                cardSection.style.background = linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%);
+            }
+
+            // Обработчик события для кнопки редактирования
+            editCardButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Предотвращаем всплытие события, чтобы не закрыть модальное окно сразу
+                colorPickerModal.classList.toggle('visible'); // Переключаем видимость модального окна
+            });
+
+            // Обработчик события для каждого варианта цвета
+            colorOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const startColor = option.getAttribute('data-color');
+                    const endColor = option.getAttribute('data-gradient-end');
+                    setCardGradient(startColor, endColor); // Меняем градиент фона карты
+
+                    // Код для обновления цвета птиц Vanta.js удален
+                    
+                    colorPickerModal.classList.remove('visible'); // Скрываем модальное окно после выбора
+                });
+            });
+// Скрываем модальное окно при клике вне его
+            document.addEventListener('click', (event) => {
+                if (!colorPickerModal.contains(event.target) && !editCardButton.contains(event.target)) {
+                    colorPickerModal.classList.remove('visible');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

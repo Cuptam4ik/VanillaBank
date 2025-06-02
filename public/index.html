@@ -11,9 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="images/favicon.png" type="image/png" />
   </head>
   <body>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <div class="navbar">
       <div class="logo" id="logo">
         <img src="images/logo.png" alt="VanillaPlus Logo" width="48" height="40" style="margin-right: 8px;">
@@ -67,11 +67,34 @@
         <input type="text" id="auth-username" class="modal-input" placeholder="Введите имя пользователя" />
         <input type="password" id="auth-password" class="modal-input" placeholder="Введите пароль..." />
         <button id="auth-login-button" class="modal-button">Войти</button>
-          <button id="auth-reg-button" class="modal-button action">Регистрация</button>
+          <button id="auth-reg-button" class="modal-button">Регистрация</button>
         <div id="auth-modal-status" class="modal-status"></div>
       </div>
     </div>
 
+    <div class="color-picker-modal" id="colorPickerModal">
+          <div class="color-option" data-color="#EA4242" data-gradient-end="#C0392B">
+              <span class="color-name">Красный</span>
+          </div>
+          <div class="color-option" data-color="#4287F5" data-gradient-end="#2167D0">
+              <span class="color-name">Синий</span>
+          </div>
+          <div class="color-option" data-color="#4CAF50" data-gradient-end="#388E3C">
+              <span class="color-name">Зеленый</span>
+          </div>
+          <div class="color-option" data-color="#9C27B0" data-gradient-end="#7B1FA2">
+              <span class="color-name">Фиолетовый</span>
+          </div>
+          <div class="color-option" data-color="#4DD0E1" data-gradient-end="#00BCD4">
+              <span class="color-name">Бирюзовый</span>
+          </div>
+          <div class="color-option" data-color="#E0E0E0" data-gradient-end="#BDBDBD">
+              <span class="color-name">Серый</span>
+          </div>
+          <div class="color-option" data-color="#FF9800" data-gradient-end="#F57C00">
+              <span class="color-name">Оранжевый</span>
+          </div>
+    </div>
 
     <nav class="side-menu" id="side-menu">
       <button id="bank-btn" class="menu">
@@ -98,12 +121,11 @@
       </div>
       <div id="bank-page">
         <div class="bank-main">
-          <div class="card">
+          <div class="card" id="card">
             <div class="card-header">
                 <span id="card-holder">Mr. Test</span>
-                <span id="card-telegram-id">@mr_test</span>
                 <div class="filler"></div>
-                <span id="card-edit">
+                <span id="card-edit-btn">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
                 </span>
             </div>
@@ -118,7 +140,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>
                 Перевод по карте 
             </button>
-             <button id="bank-btn" class="action" disabled>Штрафы (скоро...)</button>
+             <button id="bank-btn" class="action" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="-2 -2 24 24"><path fill="currentColor" d="M5.094 16.32A8 8 0 0 0 16.32 5.094zM3.68 14.906L14.906 3.68A8 8 0 0 0 3.68 14.906M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10s-4.477 10-10 10"/></svg>
+              Штрафы</button>
         </div>
         </div>
         <div class="bank-personal-transactions">
@@ -203,6 +227,13 @@
       const cardHolderSpan = document.getElementById("card-holder");
       const cardTelegramIdSpan = document.getElementById("card-telegram-id");
 
+      const cardSection = document.getElementById('card');
+      const editCardButton = document.getElementById('card-edit-btn');
+      const colorPickerModal = document.getElementById('colorPickerModal');
+      const colorOptions = document.querySelectorAll('.color-option');
+
+      console.log(editCardButton);
+
 
       let menuOpened = false;
       let currentMenu = null;
@@ -210,12 +241,6 @@
       let authorized = true; 
      
       let currentUser = null; // { nickname, balance, isAdmin, isBanker }
-
-      const tg = window.Telegram.WebApp;
-      tg.expand();
-
-      const user = tg.initDataUnsafe.user;
-      const initData = tg.initData;
       
         checkSession();
 
@@ -326,13 +351,16 @@
           cardBalanceSpan.textContent = `${currentUser.balance} аб`;
           cardNumberSpan.textContent = currentUser.cardNumber || "Не указано";
           cardHolderSpan.textContent = currentUser.nickname || "Не указано";
-          cardTelegramIdSpan.textContent = currentUser.telegramId || "Не указано";
         } else {
           cardBalanceSpan.textContent = "0 аб";
           cardNumberSpan.textContent = "Не указано";
           cardHolderSpan.textContent = "Не указано";
-          cardTelegramIdSpan.textContent = "Не указано";
         }
+        let gradient = getGradientFromLocalStorage();
+        if (!gradient == null) {
+           setCardGradient("#EA4242", "#C0392B");
+        }
+        setCardGradient(gradient.startColor, gradient.endColor);
       }
 
       function updateUIForRole() {
@@ -386,10 +414,9 @@
                 const color = tx.type === "DEPOSIT" ? "#4CAF50" : tx.type === "WITHDRAWAL" ? "#F44336" : "white";
 
                 const item = `<div class="transaction-item">
-                    <span class="transaction-id">#${tx.id}</span>
-                    <span class="transaction-type">${tx.type}</span>
+                    <span class="transaction-type">${getLocaleTransactionType(tx.type)}</span>
                     <span class="transaction-amount" style="color: ${color};">${tx.amount} аб</span>
-                    <span class="transaction-date">${tx.createdAt}</span>
+                    <span class="transaction-date">${formatDateTimeWithoutSeconds(tx.createdAt)}</span>
                     ${senderString}
                     ${receiverString}
                 </div>`;
@@ -700,6 +727,88 @@
             return null;
         }
       }
+
+      function formatDateTimeWithoutSeconds(isoString) {
+        const date = new Date(isoString);
+
+        // Получаем компоненты
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // месяцы с 0
+        const year = date.getFullYear();
+
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+
+        // Собираем строку
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
+      }
+
+      function getLocaleTransactionType(type) {
+        switch (type) {
+            case "DEPOSIT":
+                return "Пополнение";
+            case "WITHDRAWAL":
+                return "Списание";
+            case "TRANSFER":
+                return "Перевод";
+            default:
+                return type;
+        }
+      }
+
+      // Функция для установки градиентного фона карты
+      function setCardGradient(startColor, endColor) {
+          cardSection.style.background = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
+      }
+
+      // Функция для сохранения градиента в localStorage
+      function saveGradientToLocalStorage(startColor, endColor) {
+        const gradient = { startColor, endColor };
+        localStorage.setItem('cardGradient', JSON.stringify(gradient));
+      }
+
+      // Получаем градиент из localStorage при загрузке страницы
+      function getGradientFromLocalStorage() {
+        const stored = localStorage.getItem('cardGradient');
+        if (stored) {
+          try {
+            return JSON.parse(stored); // вернёт объект { startColor, endColor }
+          } catch (e) {
+            console.error('Ошибка парсинга градиента из localStorage', e);
+          }
+        }
+        return null; // если нет данных
+      }
+
+      // Обработчик события для кнопки редактирования
+      editCardButton.addEventListener('click', (e) => {
+          console.log("lok");
+          e.stopPropagation(); // Предотвращаем всплытие события, чтобы не закрыть модальное окно сразу
+          colorPickerModal.classList.toggle('visible'); // Переключаем видимость модального окна
+          colorPickerModal.style.left = `${e.clientX}px`; // Устанавливаем позицию модального окна по X
+          colorPickerModal.style.top = `${e.clientY}px`; // Устанавливаем позицию модального окна по Y
+      });
+
+      // Обработчик события для каждого варианта цвета
+      colorOptions.forEach(option => {
+          option.addEventListener('click', () => {
+              const startColor = option.getAttribute('data-color');
+              const endColor = option.getAttribute('data-gradient-end');
+              setCardGradient(startColor, endColor); // Меняем градиент фона карты
+              saveGradientToLocalStorage(startColor, endColor); // Сохраняем градиент в localStorage
+              
+              colorPickerModal.classList.remove('visible'); // Скрываем модальное окно после выбора
+          });
+      });
+      // Скрываем модальное окно при клике вне его
+      document.addEventListener('click', (event) => {
+          if (!colorPickerModal.contains(event.target) && !editCardButton.contains(event.target)) {
+              colorPickerModal.classList.remove('visible');
+          }
+      });
+
+
+
     </script>
   </body>
 </html>

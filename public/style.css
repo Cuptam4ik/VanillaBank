@@ -93,6 +93,7 @@
         flex-direction: column;
         flex-grow: 1;
         padding: 16px;
+        overflow-y: auto;
       }
       .centered-div {
         font-size: 2rem;
@@ -122,19 +123,22 @@
         gap: 4rem;
         height: 100%;
         width: 100%;
-        flex-wrap: wrap;
       }
       .bank-operations {
         display: flex;
         flex-grow: 1;
         gap: 4rem;
-        max-width: 30rem;
         align-items: start;
-        width: 100%;
+        flex: 1;
+      }
+
+       .bank-operations button {
+        flex: 1;
       }
 
       .bank-main{
         display: flex;
+        flex-wrap: wrap;
         gap: 2rem;
         width: 100%;
       }
@@ -204,9 +208,9 @@
       .card #card-telegram-id {
         font-size: 1.25rem;
       }
-      .card #card-edit {
+      .card #card-edit-btn {
         cursor: pointer;
-        transition: color 0.2s;
+        display: block;
       }
 
       .body-gray {
@@ -226,7 +230,7 @@
         border: none;
         border-radius: 1.25rem;
         cursor: pointer;
-        margin-bottom: 12px;
+        margin-bottom: 0;
         transition: background 0.2s;
       }
       button:hover {
@@ -245,6 +249,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
+        transition: transform 0.2s, background-color 0.2s;
+      }
+
+      button.action:hover {
+        background-color: #1d1d23;
+        transform: translate(0, -4px);
       }
 
       button.menu {
@@ -375,6 +385,50 @@
             color: #F44336; /* Red */
         }
 
+      .color-picker-modal {
+            position: absolute;
+            top: 250px; /* Позиционируем ниже карты */
+            background: rgba(21, 21, 25, 0.95); /* Темный фон, как у кнопок */
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Более темная тень */
+            display: flex;
+            flex-direction: column; /* Вертикальное расположение */
+            gap: 5px; /* Уменьшенный отступ между элементами */
+            z-index: 20; /* Выше кнопки редактирования */
+            opacity: 0; /* Изначально скрыт */
+            visibility: hidden; /* Изначально скрыт */
+            transform: translateY(-10px); /* Небольшое смещение для анимации */
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            width: fit-content; /* Ширина по содержимому */
+            margin-top: 10px; /* Отступ от кнопки */
+            border: 1px solid #585858; /* Граница как у кнопок */
+        }
+        .color-picker-modal.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .color-option {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Центрируем текст */
+            cursor: pointer;
+            padding: 8px 15px; /* Увеличенный padding для лучшей области нажатия */
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            min-width: 120px; /* Минимальная ширина для единообразия */
+        }
+        .color-option:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Светлый фон при наведении */
+        }
+        .color-name {
+            color: white; /* Белый цвет текста для темного фона */
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400; /* Нормальный вес шрифта */
+        }
+
       @media (max-width: 600px) {
         .navbar {
           background-color: #0D0D11;
@@ -406,5 +460,26 @@
         #bank-page {
           flex-direction: column;
           align-items: center;
+        }
+
+        .transaction-list{
+          width: 100%;
+          overflow-x: auto;
+        }
+
+        .bank-personal-transactions {
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .bank-operations {
+          gap: 1rem;
+        }
+
+        .color-picker-modal {
+            width: 80%; /* Ширина модального окна на мобильных */
+            top: 200px; /* Позиционирование на мобильных */
+            left: 50%;
+            transform: translateX(-50%);
         }
       }
