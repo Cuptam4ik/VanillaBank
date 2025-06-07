@@ -7,13 +7,13 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL") // Убедитесь, что DATABASE_URL="file:./dev.db" в вашем .env файле
 }
 
 enum OperationBy {
   PLAYER
   BANK
-INSPECTOR // Инспектор создает сущность Fine, а не Transaction напрямую
+  INSPECTOR // Инспектор создает сущность Fine, а не Transaction напрямую
 }
 
 enum TransactionType {
@@ -43,8 +43,9 @@ model User {
 model Transaction {
   id                 Int             @id @default(autoincrement())
   senderCardNumber   Int?
-  receiverCardNumber Int?            // Для FINE_PAYMENT может быть null (казна) или ID конкретного счета
+  receiverCardNumber Int?            // Для FINE (оплаты штрафа) может быть условный номер "казны"
   amount             Int
+  reason             String?         // Причина перевода, указанная игроком
   operationBy        OperationBy
   type               TransactionType
   createdAt          DateTime        @default(now())

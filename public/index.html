@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
+
     <title>VanillaPlus</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +48,7 @@
         <h2 id="card-op-modal-title" class="modal-title">Операция с картой</h2>
         <input type="number" id="card-op-modal-input1" class="modal-input" placeholder="Введите данные" />
         <input type="number" id="card-op-modal-input2" class="modal-input" placeholder="Введите сумму" />
+        <input type="text" id="card-op-modal-input3" class="modal-input" placeholder="Причина (необязательно)" />
         <button id="card-op-modal-button" class="modal-button">Подтвердить</button>
         <div id="card-op-modal-status" class="modal-status"></div>
       </div>
@@ -62,7 +63,7 @@
         <div id="card-op-sec-modal-status" class="modal-status"></div>
       </div>
     </div>
-    
+
     <!-- Modal for issuing fines (Inspector) -->
     <div class="modal" id="issue-fine-extended-modal" style="display: none;">
       <div class="modal-content">
@@ -85,6 +86,18 @@
         </div>
         <button id="close-fines-modal-btn" class="modal-button gray-button">Закрыть</button>
         <div id="player-fines-modal-status" class="modal-status" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Modal for Calling Staff -->
+    <div class="modal" id="call-staff-modal" style="display: none;">
+      <div class="modal-content">
+        <h2 id="call-staff-modal-title" class="modal-title">Вызвать сотрудника</h2>
+        <p style="font-size: 0.9em; margin-bottom: 1rem; color: #bdbdbd;">Выберите, кого вы хотите вызвать. Пожалуйста, не злоупотребляйте этой функцией. Действует перезарядка 5 минут.</p>
+        <button id="call-staff-banker-btn" class="modal-button">Вызвать Банкира</button>
+        <button id="call-staff-inspector-btn" class="modal-button" style="margin-top: 0.5rem;">Вызвать Инспектора</button>
+        <button id="call-staff-modal-close-btn" class="modal-button gray-button" style="margin-top: 1rem;">Закрыть</button>
+        <div id="call-staff-modal-status" class="modal-status"></div>
       </div>
     </div>
 
@@ -151,7 +164,7 @@
     </nav>
     <main class="main-content" id="main-content">
       <div class="centered-div" id="welcome-div">
-          <div class="additional-info">play.bixland.ru 1.21.4+</div>
+          <div class="additional-info"></div>
       </div>
       <div id="bank-page">
         <canvas id="stars"></canvas>
@@ -176,12 +189,16 @@
         <div class="bank-operations">
              <button id="card-send-btn" class="action">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>
-                Перевод по карте 
+                Перевод по карте
             </button>
              <button id="player-fines-btn" class="action">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-              Штрафы 
+              Штрафы
               <span id="fines-notification-dot" class="notification-dot" style="display:none;">!</span>
+            </button>
+            <button id="call-staff-btn" class="action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>
+                Вызвать сотрудника
             </button>
         </div>
         </div>
@@ -221,7 +238,7 @@
            <button id="issue-fine-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2H9c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2M9 4h6v2H9zm6 16H9v-2h6zm-3-4c-.55 0-1-.45-1-1s.45-1 1-1s1 .45 1 1s-.45 1-1 1m0-4c-.55 0-1-.45-1-1s.45-1 1-1s1 .45 1 1s-.45 1-1 1m0-4c-.55 0-1-.45-1-1s.45-1 1-1s1 .45 1 1s-.45 1-1 1"/></svg>
             Выдать штраф</button>
-           
+
            <div class="overdue-fines-section">
                 <h3 class="transaction-title">Просроченные штрафы (выданные вами):</h3>
                 <div id="inspector-overdue-fines-list" class="transaction-list">
@@ -243,19 +260,19 @@
       const logo = document.getElementById("logo");
 
       // Menu buttons
-      const bankBtn = document.getElementById("bank-btn"); 
-      const bankManagmentBtn = document.getElementById("bank-managment-btn"); 
-      const inspectorPanelBtn = document.getElementById("inspector-panel-btn"); 
-      const transactionsBtn = document.getElementById("bank-transactions-btn"); 
+      const bankBtn = document.getElementById("bank-btn");
+      const bankManagmentBtn = document.getElementById("bank-managment-btn");
+      const inspectorPanelBtn = document.getElementById("inspector-panel-btn");
+      const transactionsBtn = document.getElementById("bank-transactions-btn");
       const exitBtn = document.getElementById("exit-btn");
-      
+
       // Page divs
       const welcomeDiv = document.getElementById("welcome-div");
-      const bankPage = document.getElementById("bank-page"); 
-      const bankManagementPage = document.getElementById("bank-management-page"); 
-      const inspectorPage = document.getElementById("inspector-page"); 
-      const bankTransactionsPage = document.getElementById("bank-transactions-page"); 
-      
+      const bankPage = document.getElementById("bank-page");
+      const bankManagementPage = document.getElementById("bank-management-page");
+      const inspectorPage = document.getElementById("inspector-page");
+      const bankTransactionsPage = document.getElementById("bank-transactions-page");
+
       // --- Modals & Their Content ---
       // Auth Modal
       const authModal = document.getElementById("auth-modal");
@@ -270,6 +287,7 @@
       const cardOpModalTitle = document.getElementById("card-op-modal-title");
       const cardOpModalInput1 = document.getElementById("card-op-modal-input1");
       const cardOpModalInput2 = document.getElementById("card-op-modal-input2");
+      const cardOpModalInput3 = document.getElementById("card-op-modal-input3");
       const cardOpModalButton = document.getElementById("card-op-modal-button");
       const cardOpModalStatus = document.getElementById("card-op-modal-status");
 
@@ -279,7 +297,7 @@
       const cardOpSecModalInput = document.getElementById("card-op-sec-modal-input");
       const cardOpSecModalButton = document.getElementById("card-op-sec-modal-button");
       const cardOpSecModalStatus = document.getElementById("card-op-sec-modal-status");
-      
+
       // Issue Fine Extended Modal (Inspector)
       const issueFineExtendedModal = document.getElementById("issue-fine-extended-modal");
       const issueFineModalCardInput = document.getElementById("issue-fine-modal-card");
@@ -295,13 +313,21 @@
       const closeFinesModalBtn = document.getElementById("close-fines-modal-btn");
       const playerFinesModalStatus = document.getElementById("player-fines-modal-status");
 
+      // --- NEW: Call Staff Modal Elements ---
+      const callStaffModal = document.getElementById("call-staff-modal");
+      const callStaffBankerBtn = document.getElementById("call-staff-banker-btn");
+      const callStaffInspectorBtn = document.getElementById("call-staff-inspector-btn");
+      const callStaffModalCloseBtn = document.getElementById("call-staff-modal-close-btn");
+      const callStaffModalStatus = document.getElementById("call-staff-modal-status");
+
 
       // --- Action Buttons ---
       // Player Actions
       const cardSendBtn = document.getElementById("card-send-btn");
-      const playerFinesBtn = document.getElementById("player-fines-btn"); // Button to open fines modal
+      const playerFinesBtn = document.getElementById("player-fines-btn");
       const finesNotificationDot = document.getElementById("fines-notification-dot");
-      
+      const callStaffBtn = document.getElementById("call-staff-btn"); // NEW
+
       // Banker/Admin Actions (on bank-management-page)
       const cardDepositBtn = document.getElementById("card-deposit-btn");
       const cardWithdrawBtn = document.getElementById("card-withdraw-btn");
@@ -312,7 +338,7 @@
       const checkBalanceBtn = document.getElementById("check-balance-btn");
 
       // Inspector Actions (on inspector-page)
-      const issueFineBtn = document.getElementById("issue-fine-btn"); // Button to open issue fine modal
+      const issueFineBtn = document.getElementById("issue-fine-btn");
       const inspectorOverdueFinesListDiv = document.getElementById("inspector-overdue-fines-list");
 
 
@@ -320,15 +346,15 @@
       const cardBalanceSpan = document.getElementById("card-balance");
       const cardNumberSpan = document.getElementById("card-number");
       const cardHolderSpan = document.getElementById("card-holder");
-      
+
       const cardSection = document.getElementById('card');
       const editCardButton = document.getElementById('card-edit-btn');
       const colorPickerModal = document.getElementById('colorPickerModal');
       const colorOptions = document.querySelectorAll('.color-option');
 
       let menuOpened = false;
-      let currentUser = null; // { nickname, balance, isAdmin, isBanker, isInspector, cardNumber, unpaidFinesCount }
-      
+      let currentUser = null;
+
       checkSession();
 
       async function checkSession() {
@@ -340,15 +366,15 @@
                 const data = await res.json();
                 if (data.user) {
                     currentUser = data.user;
-                    updateUIForUser(); 
-                    updateUIForRole();  
-                } else { // Should not happen if res.ok
+                    updateUIForUser();
+                    updateUIForRole();
+                } else {
                     showAuthModal();
                 }
             } else {
                 const errorData = await res.json().catch(() => ({ error: "Ошибка получения профиля" }));
                 console.error("Profile check error:", res.status, errorData.error);
-                showAuthModal(); 
+                showAuthModal();
             }
         } catch (err) {
             console.error("Network error during session check:", err);
@@ -356,7 +382,7 @@
             showAuthModal();
         }
       }
-      
+
       function showAuthModal() {
         authModal.style.display = "flex";
         overlay.classList.add("show");
@@ -424,7 +450,7 @@
         updateUIForRole();
         closeAllPages();
         closeMenu();
-        welcomeDiv.style.display = "flex"; // Show welcome page after logout
+        welcomeDiv.style.display = "flex";
         showAuthModal();
       });
 
@@ -449,34 +475,34 @@
         if (gradient) {
            setCardGradient(gradient.startColor, gradient.endColor);
         } else {
-           setCardGradient("#EA4242", "#C0392B"); 
+           setCardGradient("#EA4242", "#C0392B");
         }
       }
 
       function updateUIForRole() {
           bankManagmentBtn.style.display = "none";
           inspectorPanelBtn.style.display = "none";
-          transactionsBtn.style.display = "none"; 
-          
+          transactionsBtn.style.display = "none";
+
           addBankerBtn.style.display = "none";
           removeBankerBtn.style.display = "none";
           addInspectorBtn.style.display = "none";
           removeInspectorBtn.style.display = "none";
 
-          if (!currentUser) return; 
+          if (!currentUser) return;
 
           const isAdmin = currentUser.isAdmin;
           const isBanker = currentUser.isBanker;
           const isInspector = currentUser.isInspector;
 
           if (isBanker || isAdmin) {
-              bankManagmentBtn.style.display = "flex"; 
-              transactionsBtn.style.display = "flex";   
+              bankManagmentBtn.style.display = "flex";
+              transactionsBtn.style.display = "flex";
           }
-          if (isInspector || isAdmin) { // Admin can also access inspector panel for testing/oversight
+          if (isInspector || isAdmin) {
               inspectorPanelBtn.style.display = "flex";
           }
-          
+
           if (isAdmin) {
               addBankerBtn.style.display = "flex";
               removeBankerBtn.style.display = "flex";
@@ -486,7 +512,7 @@
       }
 
     async function loadTransactions(parent, endpoint, personal) {
-        parent.innerHTML = ''; // Очистка списка транзакций
+        parent.innerHTML = '';
         try {
             const res = await fetch(endpoint, { credentials: 'include' });
             if (!res.ok) {
@@ -494,7 +520,6 @@
                 return;
             }
             data = await res.json();
-            console.log(data); 
             if (data === undefined) {
                 parent.innerHTML = '<div class="error">Нет данных о транзакциях</div>';
                 return;
@@ -511,25 +536,26 @@
                     <span>Отправитель</span>
                     <div></div>
                     <span>Получатель</span>
+                    <span class="transaction-reason-cell">Причина</span>
                 </div>`;
 
             data.forEach(tx => {
                 const bankSvg = `<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M7.292 1.712c.418-.32.999-.32 1.417 0l4.962 3.793c.632.483.293 1.491-.501 1.495H2.83c-.793-.004-1.133-1.012-.5-1.495zM8 5.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5M3.5 8v3H5V8zM6 8v3h1.5V8zm2.5 0v3H10V8zM11 8v3h1.5V8zm-9 5.25c0-.69.56-1.25 1.25-1.25h9.5c.69 0 1.25.56 1.25 1.25v.25a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5z"/></svg></div>`;
                 const arrowSvg = `<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.16L18.24 6.4v4.24H0v3.04h18.24v4.24z"/></svg></div>`;
-                
+
                 if(tx.sender !== null && tx.sender.nickname === currentUser.nickname) {
                     tx.sender.nickname = "Вы";
                 }
                 if(tx.receiver !== null && tx.receiver.nickname === currentUser.nickname) {
                     tx.receiver.nickname = "Вы";
                 }
-                
+
                 const sender = tx.sender || null;
                 const senderString = sender !== null ? `<div>
                         <span class="transaction-sender">${sender.nickname}</span>
                         <span class="transaction-card-number">${sender.cardNumber}</span>
                     </div>` : bankSvg;
-                
+
                 const receiver = tx.receiver || null;
                 const receiverString = receiver !== null ? `<div>
                         <span class="transaction-receiver">${receiver.nickname}</span>
@@ -541,9 +567,9 @@
                 let color = tx.type === "DEPOSIT" ? "#4CAF50" : tx.type === "WITHDRAWAL" ? "#F44336" : "white";
                 let amount = tx.amount;
                 if(tx.type === "TRANSFER" && personal) {
-                  if(tx.sender.nickname === "Вы"){
+                  if(tx.sender?.nickname === "Вы"){ // Added optional chaining for safety
                        amount = "-" + amount;
-                      color = "#F44336"; 
+                      color = "#F44336";
                   }
                   else {
                     amount = "+" + amount;
@@ -558,6 +584,12 @@
                     amount = "-" + amount;
                     color = "#F44336";
                 }
+                else if(tx.type === "FINE"){ // Handling FINE type for personal transactions
+                    amount = "-" + amount;
+                    color = "#F44336";
+                }
+
+                const reasonString = tx.type === 'TRANSFER' && tx.reason ? tx.reason : '-';
 
                 const item = `<div class="transaction-item">
                     ${idString}
@@ -567,6 +599,7 @@
                     ${senderString}
                     ${arrowSvg}
                     ${receiverString}
+                    <span class="transaction-reason-cell">${reasonString}</span>
                 </div>`;
                 parent.innerHTML += item;
             });
@@ -575,7 +608,7 @@
             console.error("Ошибка загрузки транзакций:", e);
         }
     }
-    
+
       function toggleMenu() {
         if (menuOpened) closeMenu();
         else openMenu();
@@ -601,22 +634,26 @@
         bankTransactionsPage.style.display = "none";
         document.body.classList.remove("body-gray");
       }
-      
+
       // --- Generic Modal Handlers (Two Inputs) ---
-      function showTwoInputsModal(title, ph1, ph2, btnText, callback, input1Type = 'number', input2Type = 'number') {
+      function showTwoInputsModal(title, ph1, ph2, btnText, callback, options = {}) {
         cardOpModalTitle.textContent = title;
         cardOpModalInput1.placeholder = ph1;
-        cardOpModalInput1.type = input1Type;
+        cardOpModalInput1.type = options.input1Type || 'number';
         cardOpModalInput2.placeholder = ph2;
-        cardOpModalInput2.type = input2Type;
+        cardOpModalInput2.type = options.input2Type || 'number';
+
+        cardOpModalInput3.style.display = options.showReason ? 'block' : 'none';
+
         cardOpModalButton.textContent = btnText;
         cardOpModal.style.display = "flex";
         overlay.classList.add("show");
-        cardOpModalButton.onclick = () => callback(cardOpModalInput1.value, cardOpModalInput2.value);
+        cardOpModalButton.onclick = () => callback(cardOpModalInput1.value, cardOpModalInput2.value, cardOpModalInput3.value);
       }
+
       function closeTwoInputsModal() {
         cardOpModal.style.display = "none";
-        cardOpModalInput1.value = ""; cardOpModalInput2.value = "";
+        cardOpModalInput1.value = ""; cardOpModalInput2.value = ""; cardOpModalInput3.value = "";
         cardOpModalStatus.textContent = ""; cardOpModalStatus.style.display = "none";
         overlay.classList.remove("show");
       }
@@ -654,26 +691,32 @@
       cardSendBtn.addEventListener("click", () => {
         if (!currentUser) { alert("Сначала войдите в систему."); return; }
         showTwoInputsModal("Перевод по карте", "Номер карты получателя", "Сумма перевода", "Отправить",
-          async (receiverCardNumber, amountStr) => {
+          async (receiverCardNumber, amountStr, reason) => {
             const amount = parseInt(amountStr, 10);
             if (!receiverCardNumber || !amount || amount <= 0) {
                 showTwoInputModalStatus('Введите корректные данные.', true); return;
             }
             showTwoInputModalStatus('Обработка...');
             const data = await apiCall('/api/player/transfer', 'POST', {
-                senderCardNumber: currentUser.cardNumber, receiverCardNumber, amount
+                senderCardNumber: currentUser.cardNumber, receiverCardNumber, amount, reason
             });
-            if (data) {
-                showTwoInputModalStatus(data.message, !data.senderBalance);
-                if (data.senderBalance !== undefined) {
-                    currentUser.balance = data.senderBalance;
-                    updateUIForUser();
-                    setTimeout(closeTwoInputsModal, 2000);
-                }
+            if (data && data.senderBalance !== undefined) { // Check for successful response structure
+                showTwoInputModalStatus(data.message, false); // Success
+                currentUser.balance = data.senderBalance;
+                updateUIForUser();
+                setTimeout(closeTwoInputsModal, 2000);
             } else {
-                showTwoInputModalStatus(data?.message || "Ошибка перевода.", true);
+                // apiCall handles setting the error message in the modal status
+                // If apiCall returned null, an error already occurred and was shown.
+                // If data is returned but not in the expected success format, it's also an error.
+                if (data && data.message) {
+                    showTwoInputModalStatus(data.message, true);
+                } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
+                    showTwoInputModalStatus("Ошибка перевода.", true);
+                }
             }
-          }
+          },
+          { showReason: true }
         );
       });
 
@@ -723,16 +766,19 @@
         playerFinesModalStatus.style.color = "#4CAF50";
 
         const data = await apiCall(`/api/player/pay-fine/${fineId}`, 'POST');
-        if (data) {
+        if (data && data.newBalance !== undefined) {
             playerFinesModalStatus.textContent = data.message;
-            if (data.newBalance !== undefined) {
-                currentUser.balance = data.newBalance;
-                currentUser.unpaidFinesCount = data.unpaidFinesCount;
-                updateUIForUser();
-                openPlayerFinesModal(); // Refresh list
-            }
+            playerFinesModalStatus.style.color = "#4CAF50";
+            currentUser.balance = data.newBalance;
+            currentUser.unpaidFinesCount = data.unpaidFinesCount;
+            updateUIForUser();
+            await openPlayerFinesModal(); // Refresh list
         } else {
-            playerFinesModalStatus.textContent = data?.message || "Ошибка оплаты штрафа.";
+            if (data && data.message) {
+                 playerFinesModalStatus.textContent = data.message;
+            } else if (!playerFinesModalStatus.textContent || playerFinesModalStatus.style.display === 'none') {
+                 playerFinesModalStatus.textContent = "Ошибка оплаты штрафа.";
+            }
             playerFinesModalStatus.style.color = "#FB4848";
         }
       }
@@ -741,6 +787,63 @@
         overlay.classList.remove("show");
       });
       playerFinesModal.addEventListener("click", (e) => { if (e.target === playerFinesModal) closeFinesModalBtn.click(); });
+
+      // --- NEW: Call Staff Modal Handlers & Button ---
+      function showCallStaffModal() {
+        callStaffModalStatus.textContent = "";
+        callStaffModalStatus.style.display = "none";
+        callStaffModal.style.display = "flex";
+        overlay.classList.add("show");
+      }
+
+      function closeCallStaffModal() {
+        callStaffModal.style.display = "none";
+        overlay.classList.remove("show");
+      }
+
+      function showCallStaffModalStatus(message, isError = false) {
+        callStaffModalStatus.textContent = message;
+        callStaffModalStatus.style.color = isError ? "#FB4848" : "#4CAF50";
+        callStaffModalStatus.style.display = "block";
+      }
+
+      callStaffBtn.addEventListener("click", () => {
+        if (!currentUser) { alert("Сначала войдите в систему."); return; }
+        showCallStaffModal();
+      });
+
+      callStaffBankerBtn.addEventListener("click", async () => {
+        if (!currentUser) { closeCallStaffModal(); return; }
+        showCallStaffModalStatus("Вызываем банкира...");
+        const data = await apiCall('/api/call/banker', 'POST');
+        // apiCall will set the status. If successful and message contains "отправлен", close modal.
+        if (data && data.message && data.message.toLowerCase().includes("отправлен")) {
+            setTimeout(closeCallStaffModal, 3000);
+        } else if (data && data.message) { // If there's a message but not success, ensure it's shown as error
+            showCallStaffModalStatus(data.message, true);
+        } else if (!callStaffModalStatus.textContent || callStaffModalStatus.style.display === 'none') {
+            // Fallback error if apiCall didn't set a message (e.g. network error before response)
+            showCallStaffModalStatus("Ошибка вызова банкира.", true);
+        }
+      });
+
+      callStaffInspectorBtn.addEventListener("click", async () => {
+        if (!currentUser) { closeCallStaffModal(); return; }
+        showCallStaffModalStatus("Вызываем инспектора...");
+        const data = await apiCall('/api/call/inspector', 'POST');
+        if (data && data.message && data.message.toLowerCase().includes("отправлен")) {
+            setTimeout(closeCallStaffModal, 3000);
+        } else if (data && data.message) {
+            showCallStaffModalStatus(data.message, true);
+        } else if (!callStaffModalStatus.textContent || callStaffModalStatus.style.display === 'none') {
+            showCallStaffModalStatus("Ошибка вызова инспектора.", true);
+        }
+      });
+
+      callStaffModalCloseBtn.addEventListener("click", closeCallStaffModal);
+      callStaffModal.addEventListener("click", (e) => {
+        if (e.target === callStaffModal) closeCallStaffModal();
+      });
 
 
       // --- Banker/Admin Action Button Handlers ---
@@ -752,15 +855,19 @@
               if (!targetCardNumber || !amount || amount <= 0) { showTwoInputModalStatus('Неверные данные.', true); return; }
               showTwoInputModalStatus('Обработка...');
               const data = await apiCall('/api/banker/deposit', 'POST', { targetCardNumber, amount });
-              if (data) {
-                  showTwoInputModalStatus(data.message);
-                  if (parseInt(targetCardNumber) === currentUser.cardNumber) { // Check if self-deposit
-                      currentUser.balance += amount; // Update balance
+              if (data && data.message && !data.message.toLowerCase().includes("ошибка")) {
+                  showTwoInputModalStatus(data.message, false);
+                  if (parseInt(targetCardNumber) === currentUser.cardNumber) {
+                      currentUser.balance += amount;
                       updateUIForUser();
                   }
                   setTimeout(closeTwoInputsModal, 2000);
               } else {
-                 showTwoInputModalStatus(data?.message || "Ошибка пополнения.", true);
+                 if (data && data.message) {
+                    showTwoInputModalStatus(data.message, true);
+                 } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
+                    showTwoInputModalStatus("Ошибка пополнения.", true);
+                 }
               }
           }
         );
@@ -774,20 +881,24 @@
             if (!targetCardNumber || !amount || amount <= 0) { showTwoInputModalStatus('Неверные данные.', true); return; }
             showTwoInputModalStatus('Обработка...');
             const data = await apiCall('/api/banker/withdraw', 'POST', { targetCardNumber, amount });
-            if (data) {
-                showTwoInputModalStatus(data.message);
+            if (data && data.message && !data.message.toLowerCase().includes("ошибка")) {
+                showTwoInputModalStatus(data.message, false);
                 if (parseInt(targetCardNumber) === currentUser.cardNumber) {
-                    currentUser.balance -= amount; // Update balance if self-withdrawal
+                    currentUser.balance -= amount;
                     updateUIForUser();
                 }
                  setTimeout(closeTwoInputsModal, 2000);
             } else {
-                showTwoInputModalStatus(data?.message || "Ошибка списания.", true);
+                if (data && data.message) {
+                    showTwoInputModalStatus(data.message, true);
+                } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
+                    showTwoInputModalStatus("Ошибка списания.", true);
+                }
             }
           }
         );
       });
-      
+
       checkBalanceBtn.addEventListener("click", () => {
         if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { alert("Нет доступа."); return; }
         showSingleInputModal("Проверка баланса", "Номер карты игрока", "Проверить",
@@ -795,65 +906,66 @@
             if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
             showSingleInputModalStatus('Проверка...');
             const data = await apiCall('/api/banker/balance', 'POST', { targetCardNumber });
-            if (data) {
-                showSingleInputModalStatus(`Баланс ${data.nickname} (${data.cardNumber}): ${data.balance} аб`);
+            if (data && data.balance !== undefined) { // Success if balance is returned
+                showSingleInputModalStatus(`Баланс ${data.nickname} (${data.cardNumber}): ${data.balance} аб`, false);
             } else {
-                showSingleInputModalStatus(data?.message || "Ошибка получения баланса.", true);
+                if (data && data.message) {
+                    showSingleInputModalStatus(data.message, true);
+                } else if (!cardOpSecModalStatus.textContent || cardOpSecModalStatus.style.display === 'none') {
+                     showSingleInputModalStatus("Ошибка получения баланса.", true);
+                }
             }
           }
         );
       });
-      
+
       // --- Admin Role Management Buttons ---
+      function handleAdminRoleChange(endpoint, targetCardNumber, successMessagePart, roleField, roleValue) {
+        if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return; }
+        showSingleInputModalStatus('Обработка...');
+        apiCall(endpoint, 'POST', { targetCardNumber }).then(data => {
+            if (data && data.message && data.message.toLowerCase().includes(successMessagePart.toLowerCase())) {
+                showSingleInputModalStatus(data.message, false);
+                if (currentUser && parseInt(targetCardNumber) === currentUser.cardNumber) {
+                    currentUser[roleField] = roleValue;
+                    updateUIForRole();
+                }
+                 setTimeout(closeSingleInputModal, 2500);
+            } else {
+                 if (data && data.message) {
+                    showSingleInputModalStatus(data.message, true);
+                } else if (!cardOpSecModalStatus.textContent || cardOpSecModalStatus.style.display === 'none') {
+                     showSingleInputModalStatus("Ошибка при изменении роли.", true);
+                }
+            }
+        });
+      }
+
       addBankerBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
         showSingleInputModal("Назначить банкира", "Номер карты игрока", "Назначить",
-          async (targetCardNumber) => {
-            if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
-            showSingleInputModalStatus('Назначение...');
-            const data = await apiCall('/api/admin/add-banker', 'POST', { targetCardNumber });
-            showSingleInputModalStatus(data?.message || "Ошибка.", !data);
-            if (data && parseInt(targetCardNumber) === currentUser.cardNumber) { currentUser.isBanker = true; updateUIForRole(); } 
-          }
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/add-banker', targetCardNumber, "теперь банкир", "isBanker", true)
         );
       });
       removeBankerBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
         showSingleInputModal("Снять роль банкира", "Номер карты игрока", "Снять роль",
-          async (targetCardNumber) => {
-             if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
-             showSingleInputModalStatus('Снятие роли...');
-             const data = await apiCall('/api/admin/remove-banker', 'POST', { targetCardNumber });
-             showSingleInputModalStatus(data?.message || "Ошибка.", !data);
-             if (data && parseInt(targetCardNumber) === currentUser.cardNumber) { currentUser.isBanker = false; updateUIForRole(); }
-          }
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-banker', targetCardNumber, "роль банкира снята", "isBanker", false)
         );
       });
       addInspectorBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
         showSingleInputModal("Назначить инспектора", "Номер карты игрока", "Назначить",
-          async (targetCardNumber) => {
-            if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
-            showSingleInputModalStatus('Назначение...');
-            const data = await apiCall('/api/admin/add-inspector', 'POST', { targetCardNumber });
-            showSingleInputModalStatus(data?.message || "Ошибка.", !data);
-            if (data && parseInt(targetCardNumber) === currentUser.cardNumber) { currentUser.isInspector = true; updateUIForRole(); }
-          }
+           (targetCardNumber) => handleAdminRoleChange('/api/admin/add-inspector', targetCardNumber, "теперь инспектор", "isInspector", true)
         );
       });
       removeInspectorBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
         showSingleInputModal("Снять роль инспектора", "Номер карты игрока", "Снять роль",
-          async (targetCardNumber) => {
-            if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
-            showSingleInputModalStatus('Снятие роли...');
-            const data = await apiCall('/api/admin/remove-inspector', 'POST', { targetCardNumber });
-            showSingleInputModalStatus(data?.message || "Ошибка.", !data);
-            if (data && parseInt(targetCardNumber) === currentUser.cardNumber) { currentUser.isInspector = false; updateUIForRole(); }
-          }
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-inspector', targetCardNumber, "роль инспектора снята", "isInspector", false)
         );
       });
-      
+
       // --- Inspector Action Button Handlers ---
       issueFineBtn.addEventListener("click", () => {
         if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin) ) { alert("Нет доступа."); return; }
@@ -865,10 +977,12 @@
         issueFineModalAmountInput.value = '';
         issueFineModalReasonInput.value = '';
         issueFineModalDaysInput.value = '';
+        issueFineExtendedModalStatus.textContent = '';
         issueFineExtendedModalStatus.style.display = "none";
         issueFineExtendedModal.style.display = "flex";
         overlay.classList.add("show");
       }
+
       issueFineExtendedModalButton.addEventListener("click", async () => {
           const targetCardNumber = issueFineModalCardInput.value.trim();
           const amount = parseInt(issueFineModalAmountInput.value, 10);
@@ -886,18 +1000,23 @@
           issueFineExtendedModalStatus.style.display = "block";
 
           const data = await apiCall('/api/inspector/issue-fine', 'POST', { targetCardNumber, amount, reason, daysUntilDue });
-          if (data) {
+          if (data && data.fine) { // Success if fine object is returned
               issueFineExtendedModalStatus.textContent = data.message;
-              setTimeout(() => { // Close modal after a delay on success
+              issueFineExtendedModalStatus.style.color = "#4CAF50";
+              setTimeout(() => {
                 issueFineExtendedModal.style.display = "none";
                 overlay.classList.remove("show");
               }, 2500);
           } else {
-              issueFineExtendedModalStatus.textContent = data?.message || 'Ошибка при выписке штрафа.';
+              if (data && data.message) {
+                 issueFineExtendedModalStatus.textContent = data.message;
+              } else if (!issueFineExtendedModalStatus.textContent || issueFineExtendedModalStatus.style.display === 'none') {
+                 issueFineExtendedModalStatus.textContent = 'Ошибка при выписке штрафа.';
+              }
               issueFineExtendedModalStatus.style.color = "#FB4848";
           }
       });
-      issueFineExtendedModal.addEventListener("click", (e) => { 
+      issueFineExtendedModal.addEventListener("click", (e) => {
         if (e.target === issueFineExtendedModal) {
             issueFineExtendedModal.style.display = "none";
             overlay.classList.remove("show");
@@ -909,7 +1028,7 @@
         inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Загрузка просроченных штрафов...</div>';
         const fines = await apiCall('/api/inspector/my-overdue-fines', 'GET');
 
-        if (!fines) {
+        if (!fines) { // apiCall would have shown error
             inspectorOverdueFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>';
             return;
         }
@@ -919,7 +1038,7 @@
         }
         inspectorOverdueFinesListDiv.innerHTML = '';
         fines.forEach(fine => {
-            const item = `<div class="transaction-item"> <!-- Can reuse transaction-item style -->
+            const item = `<div class="transaction-item">
                 <span class="transaction-type">Просрочен!</span>
                 <span class="transaction-amount" style="color: #F44336;">${fine.amount} аб</span>
                 <span class="transaction-date">Срок: ${formatDateTimeWithoutSeconds(fine.dueDate)}</span>
@@ -933,16 +1052,27 @@
 
       // --- Menu Navigation & Page Toggling ---
       hamburgerBtn.addEventListener("click", toggleMenu);
-      overlay.addEventListener("click", () => { // Close any open modal or menu on overlay click
+      overlay.addEventListener("click", () => {
         closeMenu();
         closeTwoInputsModal();
         closeSingleInputModal();
         if(playerFinesModal.style.display === 'flex') closeFinesModalBtn.click();
         if(issueFineExtendedModal.style.display === 'flex') {
             issueFineExtendedModal.style.display = "none";
-            overlay.classList.remove("show"); // Ensure overlay is hidden
+            // overlay.classList.remove("show"); // Will be handled by closeMenu or specific modal close
         }
+        if(callStaffModal.style.display === 'flex') closeCallStaffModal(); // NEW
         colorPickerModal.classList.remove('visible');
+        // Ensure overlay is hidden if no modals are open after this
+        if (authModal.style.display !== 'flex' &&
+            cardOpModal.style.display !== 'flex' &&
+            cardOpSecModal.style.display !== 'flex' &&
+            playerFinesModal.style.display !== 'flex' &&
+            issueFineExtendedModal.style.display !== 'flex' &&
+            callStaffModal.style.display !== 'flex' &&
+            !sideMenu.classList.contains('open')) {
+           overlay.classList.remove("show");
+        }
       });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
@@ -952,13 +1082,22 @@
             if(playerFinesModal.style.display === 'flex') closeFinesModalBtn.click();
             if(issueFineExtendedModal.style.display === 'flex') {
                 issueFineExtendedModal.style.display = "none";
-                overlay.classList.remove("show");
             }
+            if(callStaffModal.style.display === 'flex') closeCallStaffModal(); // NEW
             colorPickerModal.classList.remove('visible');
+             if (authModal.style.display !== 'flex' &&
+                cardOpModal.style.display !== 'flex' &&
+                cardOpSecModal.style.display !== 'flex' &&
+                playerFinesModal.style.display !== 'flex' &&
+                issueFineExtendedModal.style.display !== 'flex' &&
+                callStaffModal.style.display !== 'flex' &&
+                !sideMenu.classList.contains('open')) {
+               overlay.classList.remove("show");
+            }
         }
       });
 
-      bankBtn.addEventListener("click", async () => { 
+      bankBtn.addEventListener("click", async () => {
         if (!currentUser) { showAuthModal(); return; }
         closeAllPages();
         bankPage.style.display = "flex";
@@ -967,35 +1106,35 @@
         closeMenu();
       });
 
-      bankManagmentBtn.addEventListener("click", () => { 
+      bankManagmentBtn.addEventListener("click", () => {
         if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { showAuthModal(); return; }
         closeAllPages();
         bankManagementPage.style.display = "flex";
         document.body.classList.add("body-gray");
         closeMenu();
       });
-      
-      inspectorPanelBtn.addEventListener("click", async () => { 
+
+      inspectorPanelBtn.addEventListener("click", async () => {
         if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) { showAuthModal(); return; }
         closeAllPages();
         inspectorPage.style.display = "flex";
         document.body.classList.add("body-gray");
-        await loadInspectorOverdueFines(); // Load overdue fines for inspector
+        await loadInspectorOverdueFines();
         closeMenu();
       });
 
-      transactionsBtn.addEventListener("click", async () => { 
+      transactionsBtn.addEventListener("click", async () => {
         if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { showAuthModal(); return; }
         closeAllPages();
         bankTransactionsPage.style.display = "flex";
         document.body.classList.add("body-gray");
-        await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list"); // Reused function
+        await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list", false);
         closeMenu();
       });
 
       logo.addEventListener("click", () => {
         closeAllPages();
-        welcomeDiv.style.display = "flex"; // Ensure welcome div is visible
+        welcomeDiv.style.display = "flex";
         document.body.classList.remove("body-gray");
         closeMenu();
       });
@@ -1003,44 +1142,58 @@
       // --- API Call Helper ---
       async function apiCall(endpoint, method, body) {
         const currentOpenModalStatus = getCurrentOpenModalStatusElement();
+        if (currentOpenModalStatus) { // Clear previous status message
+            currentOpenModalStatus.textContent = '';
+            currentOpenModalStatus.style.display = 'none';
+        }
         try {
             const response = await fetch(endpoint, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: body ? JSON.stringify(body) : null,
+                credentials: 'include' // Important for sessions
             });
-            const data = await response.json(); 
+            const data = await response.json().catch(() => null); // Gracefully handle non-JSON responses or empty
+
             if (!response.ok) {
-                const errorMsg = data.message || data.error || `Ошибка ${response.status}`;
-                console.error('API Error:', response.status, errorMsg);
+                const errorMsg = data?.message || data?.error || `Ошибка ${response.status}`;
+                console.error('API Error:', response.status, errorMsg, data);
                 if (currentOpenModalStatus) {
                     currentOpenModalStatus.textContent = errorMsg;
                     currentOpenModalStatus.style.color = "#FB4848";
+                    currentOpenModalStatus.style.display = "block";
                 }
-                return null; 
+                return data || { message: errorMsg, error: true }; // Return error structure
             }
-            if (currentOpenModalStatus && (method === 'POST' || method === 'PUT' || method === 'DELETE') && data.message) {
-                currentOpenModalStatus.textContent = data.message; // Show success message from server
-            } else if (currentOpenModalStatus && method !== 'GET') {
-                 currentOpenModalStatus.style.display = 'none'; // Hide status if no specific message for non-GET
+            // For POST/PUT/DELETE, if a message is present in data, show it as success
+            if (currentOpenModalStatus && (method === 'POST' || method === 'PUT' || method === 'DELETE') && data && data.message) {
+                currentOpenModalStatus.textContent = data.message;
+                currentOpenModalStatus.style.color = "#4CAF50"; // Assume success
+                currentOpenModalStatus.style.display = "block";
+            } else if (currentOpenModalStatus && method !== 'GET' && (!data || !data.message)) {
+                 // Hide status if no specific message for non-GET and no error
+                 currentOpenModalStatus.style.display = 'none';
             }
-            return data; 
+            return data;
         } catch (error) {
             console.error('API Call Exception:', error);
-            const errorMsg = 'Сетевая ошибка или ошибка сервера.';
+            const errorMsg = 'Сетевая ошибка или ошибка парсинга ответа.';
             if (currentOpenModalStatus) {
                 currentOpenModalStatus.textContent = errorMsg;
                 currentOpenModalStatus.style.color = "#FB4848";
+                currentOpenModalStatus.style.display = "block";
             }
-            return null;
+            return { message: errorMsg, error: true }; // Return error structure
         }
       }
+
       function getCurrentOpenModalStatusElement() {
         if (authModal.style.display === 'flex') return authModalStatus;
         if (cardOpModal.style.display === 'flex') return cardOpModalStatus;
         if (cardOpSecModal.style.display === 'flex') return cardOpSecModalStatus;
         if (issueFineExtendedModal.style.display === 'flex') return issueFineExtendedModalStatus;
         if (playerFinesModal.style.display === 'flex') return playerFinesModalStatus;
+        if (callStaffModal.style.display === 'flex') return callStaffModalStatus; // NEW
         return null;
       }
 
@@ -1061,7 +1214,8 @@
             case "DEPOSIT": return "Пополнение";
             case "WITHDRAWAL": return "Списание";
             case "TRANSFER": return "Перевод";
-            case "FINE_PAYMENT": return "Оплата штрафа";
+            case "FINE_PAYMENT": return "Оплата штрафа"; // Prisma schema uses FINE for this
+            case "FINE": return "Оплата штрафа"; // For display consistency
             default: return type;
         }
       }
@@ -1081,17 +1235,15 @@
         return null;
       }
       editCardButton.addEventListener('click', (e) => {
-          console.log("lok");
-          e.stopPropagation(); // Предотвращаем всплытие события, чтобы не закрыть модальное окно сразу
-          colorPickerModal.classList.toggle('visible'); // Переключаем видимость модального окна
-          console.log(e.clientX + colorPickerModal.clientWidth > window.innerWidth);
+          e.stopPropagation();
+          colorPickerModal.classList.toggle('visible');
           if(e.clientX + colorPickerModal.clientWidth > window.innerWidth){
-            colorPickerModal.style.left = `${e.clientX - colorPickerModal.clientWidth - 8}px`; // Устанавливаем позицию модального окна по X
+            colorPickerModal.style.left = `${e.clientX - colorPickerModal.clientWidth - 8}px`;
           } else {
-                colorPickerModal.style.left = `${e.clientX}px`; // Устанавливаем позицию модального окна по X
+                colorPickerModal.style.left = `${e.clientX}px`;
           }
-          colorPickerModal.style.top = `${e.clientY}px`; // Устанавливаем позицию модального окна по Y
-          
+          colorPickerModal.style.top = `${e.clientY}px`;
+
       });
       colorOptions.forEach(option => {
           option.addEventListener('click', () => {
@@ -1102,7 +1254,7 @@
               colorPickerModal.classList.remove('visible');
           });
       });
-      document.addEventListener('click', (event) => { // Close color picker on outside click
+      document.addEventListener('click', (event) => {
           if (!colorPickerModal.contains(event.target) && !editCardButton.contains(event.target)) {
               colorPickerModal.classList.remove('visible');
           }
@@ -1110,12 +1262,30 @@
 
       const starsCanvas = document.getElementById("stars");
 
-      // Make sure welcome div is shown by default if no user or specific page is requested
-      if (!currentUser && window.location.hash === '') { // Check if no deep link
+      if (!currentUser && window.location.hash === '') {
           closeAllPages();
           welcomeDiv.style.display = 'flex';
       }
     </script>
-    <script src="stars.js"></script>
+    <script src="stars.js"></script> <!-- Скрипт для звезд на странице банка -->
+    
+    <!-- Vanta.js Скрипты для анимации на главном экране -->
+    <script src="p5.min.js"></script>
+    <script src="vanta.topology.min.js"></script>
+    <script>
+    // Инициализация Vanta.js на элементе welcome-div
+    VANTA.TOPOLOGY({
+      el: "#welcome-div",
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      scale: 1.00,
+      scaleMobile: 1.00,
+      color: 0x4287f5,      // Цвет линий
+      backgroundColor: 0x1a1a2e // Цвет фона
+    })
+    </script>
   </body>
 </html>
