@@ -1,10 +1,13 @@
-  body,
+body,
       html {
         height: 100%;
         margin: 0;
         padding: 0;
         overflow-x: hidden;
         overflow-y: hidden;
+        /* Removed background image */
+        background-color: #0D0D11; /* Base dark background */
+        color: #ffffff; /* Default text color */
       }
       html, input, button {
         font-family: "Ubuntu", sans-serif;
@@ -14,15 +17,12 @@
         display: flex;
         flex-direction: column;
         height: 100vh;
-
-        background: url("images/background.jpg") no-repeat center center fixed;
-        background-size: cover;
-        color: #ffffff;
       }
       .navbar {
         width: 100%;
         height: 60px;
         backdrop-filter: blur(10px);
+        background-color: rgba(13, 13, 17, 0.5); /* Semi-transparent dark background */
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -50,7 +50,16 @@
         cursor: pointer;
         z-index: 20;
         color: #ffffff;
+        transition: transform 0.2s ease-in-out; /* Hamburger animation */
       }
+      .navbar .hamburger:hover {
+          transform: scale(1.1);
+      }
+       .navbar .hamburger:active {
+          transform: scale(0.9);
+      }
+
+
       .side-menu {
         position: fixed;
         top: 0;
@@ -72,13 +81,24 @@
       }
       .side-menu button.menu { /* General style for menu buttons */
         margin-bottom: 0.5rem;
+        transition: background-color 0.2s, transform 0.1s; /* Added transform for hover/active */
+      }
+      .side-menu button.menu:hover {
+          transform: translateX(5px); /* Subtle slide on hover */
+      }
+      .side-menu button.menu:active {
+          transform: scale(0.98); /* Subtle press on active */
       }
       .side-menu.exit {
         color: #EA4242;
       }
        .side-menu button.exit:hover {
         background-color: rgba(251, 72, 72, 0.1);
+        transform: translateX(5px); /* Still slide on hover */
       }
+       .side-menu button.exit:active {
+        transform: scale(0.98); /* Still press on active */
+       }
 
       .overlay {
         display: none;
@@ -99,43 +119,72 @@
       }
       .main-content {
         flex-grow: 1;
-        padding: 16px;
-        overflow-y: auto;
+        padding: 0; /* Remove padding from main-content, apply to pages instead */
+        overflow-y: hidden;
         overflow-x: hidden;
+        position: relative; 
       }
-      .centered-div#welcome-div { /* Specific for welcome */
-        font-size: 2rem;
-        color: #ffffff;
-        text-align: center;
-        height: 100%;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+
+      /* Page transition styles */
+      .main-content > div {
+          position: absolute; 
+          top: 0; left: 0; right: 0; bottom: 0;
+          padding: 16px; 
+          box-sizing: border-box;
+          width: 100%;
+          height: 100%;
+          display: none; /* Initially hide all pages */
+          flex-direction: column; 
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(20px);
+          transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, transform 0.5s ease-in-out;
+          overflow-y: auto; /* Allow scrolling within the page */
       }
-      .additional-info {
-        position: fixed;
-        color: #ffffff;
+      
+      .main-content > div.visible {
+          display: flex; /* Make visible pages flex */
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0); /* Slide to normal position */
+      }
+      
+       /* Welcome div needs special handling for positioning and display */
+       #welcome-div {
+            position: relative; 
+            padding: 0; 
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            transform: none; /* Reset transform */
+            display: none; /* Initially hidden */
+       }
+       
+       #welcome-div.visible {
+           display: flex; /* Show as flex */
+           opacity: 1;
+           visibility: visible;
+           transform: none; /* Ensure no transform */
+       }
+       
+       .centered-div#welcome-div .additional-info {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        color: rgba(255, 255, 255, 0.5); 
         font-size: 0.875rem;
-        bottom: 8px;
-        right: 8px;
-        padding: 8px;
       }
 
       /* Page specific styles */
-      #bank-page, #inspector-page, #bank-transactions-page {
-        display: none; /* Hidden by default, shown by JS */
-        flex-direction: column;
-        gap: 2rem; /* Consistent gap for main sections */
-        height: 100%;
-        width: 100%;
-        box-sizing: border-box;
+      #bank-page {
+         flex-direction: column;
+         gap: 2rem; 
       }
 
-
-      .bank-main{ /* Container for card and player bank operations */
+      .bank-main{ 
         display: flex;
-        flex-wrap: wrap; /* Card and ops can wrap */
+        flex-wrap: wrap; 
         gap: 2rem;
         width: 100%;
       }
@@ -147,7 +196,6 @@
       }
 
       #bank-management-page {
-        display: none;
         gap: 2rem;
         width: 100%;
         align-items: start;
@@ -160,14 +208,18 @@
         min-width: 30vw;
       }
 
+      #inspector-page {
+        gap: 2rem;
+      }
+
       #bank-transactions-page {
         color: #ffffff;
-        display: none;
         flex-direction: column;
         gap: 1rem;
         height: 100%;
         width: 100%;
       }
+      
       .card {
         border-radius: 1rem;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -189,20 +241,30 @@
       .card #card-holder { font-size: 1.5rem; }
       .card #card-edit-btn { cursor: pointer; display: block; }
 
-      .bank-operations { /* Player's operations like transfer, fines */
+      .bank-operations { 
         display: flex;
-        flex-grow: 1; /* Takes remaining space beside card if horizontal */
-        flex-direction: column; /* Stack buttons vertically */
+        flex-grow: 1; 
+        flex-direction: column; 
         gap: 1rem;
-        align-items: stretch; /* Make buttons full width of this container */
+        align-items: stretch; 
       }
       .bank-operations button.action {
-        justify-content: center; /* Center icon and text for these buttons */
+        justify-content: center; 
+         transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; 
       }
+       .bank-operations button.action:hover {
+         transform: translateY(-4px); 
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+       }
+        .bank-operations button.action:active {
+          transform: scale(0.96); 
+           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); 
+        }
+
 
       .bank-personal-transactions, .overdue-fines-section {
         width: 100%;
-        margin-top: 1rem; /* Space above transaction/fines list */
+        margin-top: 1rem; 
       }
       .card #card-balance {
         font-size: 2rem;
@@ -227,54 +289,76 @@
         cursor: pointer;
         display: block;
         text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
+        transition: transform 0.2s ease-in-out; 
+      }
+      .card #card-edit-btn:hover {
+          transform: scale(1.1); 
+      }
+       .card #card-edit-btn:active {
+          transform: scale(0.9); 
       }
 
       .shadow-icon {
         filter: drop-shadow(0px 1px 5px rgba(0, 0, 0, 0.114));
       }
 
-      /* Banker/Admin/Inspector Pages Action Buttons */
       #bank-management-page, #inspector-page {
         align-items: flex-start;
         justify-content: flex-start;
-        flex-wrap: wrap; /* Allow buttons to wrap */
+        flex-wrap: wrap; 
       }
+       #bank-management-page button.action, #inspector-page button.action {
+           transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; 
+       }
+        #bank-management-page button.action:hover, #inspector-page button.action:hover {
+             transform: translateY(-4px);
+             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        #bank-management-page button.action:active, #inspector-page button.action:active {
+           transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
 
-      .body-gray { background-color: #0D0D11; background-image: none; }
+      .body-gray {
+        background-color: #1a1a2e; 
+        background-image: none;
+      }
       .filler { flex-grow: 1; }
 
 
       button{
         padding: 1rem 1.5rem;
         font-size: 1rem;
-        background: #ffffff;
+        background: #ffffff; 
         color: #222;
         border: none;
         border-radius: 1.25rem;
         cursor: pointer;
-        transition: background 0.2s, transform 0.2s;
+        transition: background 0.2s, transform 0.1s, box-shadow 0.2s; 
         text-align: center;
-        font-family: "Nunito", sans-serif; /* Consistent font */
+        font-family: "Nunito", sans-serif; 
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
       }
-      button:hover { background: #dfdfdf; }
-      button:active { transform: scale(0.98); background: #cfcfcf; }
+      button:hover {
+          background: #dfdfdf;
+          transform: translateY(-2px); 
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+       }
+      button:active {
+          transform: scale(0.98); 
+          background: #cfcfcf;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); 
+       }
+
 
       button.action {
-        background-color: #151519;
+        background-color: #151519; 
         color: #ffffff;
         border: #404042 1px solid;
         display: flex;
         align-items: center;
         gap: 1rem;
-        transition: transform 0.2s, background-color 0.2s;
       }
-
-      button.action:hover {
-        background-color: #1d1d23;
-        transform: translate(0, -4px);
-      }
-      button.action svg { flex-shrink: 0; }
-      button.action:hover { background-color: #1d1d23; transform: translateY(-2px); }
 
       button.menu {
         display: flex;
@@ -287,11 +371,17 @@
         text-align: left;
         padding: 0.75rem 1rem;
         border-radius: 0.5rem;
+        box-shadow: none; 
       }
 
       button.menu:hover {
         background-color: #151519;
+        box-shadow: none; 
       }
+       button.menu:active {
+           box-shadow: none; 
+       }
+
 
       button.exit {
         color: #ce3c3c;
@@ -301,14 +391,16 @@
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.6);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 1000; /* High z-index */
+        display: none; 
+        align-items: center; 
+        justify-content: center;
+        z-index: 1000; 
         padding: 1rem;
         box-sizing: border-box;
       }
       .modal-content {
         background: #0D0D11;
-        padding: 1.5rem 2rem; /* Adjusted padding */
+        padding: 1.5rem 2rem; 
         border-radius: 1.25rem;
         border: #1d1d23 1px solid;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -330,22 +422,43 @@
         font-family: "Nunito", sans-serif;
       }
       .modal-button {
-        background-color: #EA4242;
+        background: linear-gradient(135deg, #371F6F 0%, #9C27B0 100%);
         color: #ffffff;
         border: none;
         padding: 0.85rem 1.5rem;
+        border-radius: 1.25rem; 
+        cursor: pointer; 
+        transition: background 0.2s, transform 0.2s; 
+        font-family: "Nunito", sans-serif; 
+         box-shadow: 0 4px 10px rgba(156, 39, 176, 0.3); 
       }
       .modal-button:hover {
-        background-color: #ce3c3c;
+        background: linear-gradient(135deg, #4A2B8A 0%, #AD35C7 100%);
+        transform: scale(1.02); 
+         box-shadow: 0 6px 14px rgba(173, 53, 199, 0.4); 
+      }
+      .modal-button:active {
+         transform: scale(0.98); 
+         box-shadow: 0 2px 6px rgba(156, 39, 176, 0.3); 
       }
 
+
       .modal-button.gray-button {
-        background-color: #4a4a4e; /* Darker gray */
+        background-color: #4a4a4e; 
         color: #e0e0e0;
+        background: none; 
+        box-shadow: none; 
       }
       .modal-button.gray-button:hover {
         background-color: #5f5f63;
+        background: none; 
+        box-shadow: none; 
       }
+       .modal-button.gray-button:active {
+           background-color: #4a4a4e;
+           box-shadow: none;
+       }
+
       .modal-status {
         display: none;
         padding: 0.75rem;
@@ -357,7 +470,6 @@
         text-align: center;
       }
 
-      /* Transaction & Fines Lists */
       .transaction-list, .fines-list {
         display: flex; flex-direction: column; align-items: stretch;
         width: 100%;
@@ -403,6 +515,13 @@
         flex: 1;
       }
 
+      .transaction-arrow {
+         flex: 0 0 auto; 
+         display: flex; 
+         align-items: center;
+      }
+
+
       .transaction-reason-cell {
         flex: 1.5 !important;
         word-break: break-word;
@@ -417,15 +536,15 @@
       .fine-item {
         display: flex; flex-wrap: wrap;
         gap: 0.5rem 1rem;
-        font-size: 0.95rem; /* Slightly smaller */
+        font-size: 0.95rem; 
         justify-content: space-between;
         border-bottom: 1px solid #2e2e32;
         align-items: center;
-        padding: 0.85rem 1rem; /* Adjusted padding */
+        padding: 0.85rem 1rem; 
       }
 
 
-      .fine-details { /* Container for nickname/card or fine details */
+      .fine-details { 
         display: flex; flex-direction: column; align-items: flex-start;
         flex: 1 1 120px;
         min-width: 100px;
@@ -439,49 +558,56 @@
 
 
       .pay-fine-btn {
-        padding: 0.5rem 1rem !important; /* Important to override general button */
+        padding: 0.5rem 1rem !important; 
         font-size: 0.9rem !important;
-        background-color: #4CAF50 !important;
+        background-color: #4CAF50 !important; 
         color: white !important;
         border-radius: 0.5rem !important;
-        margin-left: auto; /* Push to the right */
-        flex-shrink: 0; /* Don't shrink */
+        margin-left: auto; 
+        flex-shrink: 0; 
+         transition: background-color 0.2s, transform 0.1s; 
+          box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3); 
       }
-      .pay-fine-btn:hover { background-color: #45a049 !important; }
+      .pay-fine-btn:hover {
+          background-color: #45a049 !important;
+           transform: scale(1.02); 
+           box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); 
+       }
+       .pay-fine-btn:active {
+           transform: scale(0.98); 
+           box-shadow: 0 1px 3px rgba(76, 175, 80, 0.3); 
+       }
 
       .notification-dot {
-        background-color: #F44336; color: white;
+        background-color: #F44336; color: white; 
         border-radius: 50%;
-        padding: 1px 5px; /* Smaller padding */
-        font-size: 0.875em; /* Smaller font */
+        padding: 1px 5px; 
+        font-size: 0.875em; 
         margin-left: 5px;
         display: inline-block;
-        line-height: 1; /* Adjust line height for better centering */
-        vertical-align: super; /* Align with top of text */
+        line-height: 1; 
+        vertical-align: super; 
       }
 
       .info, .error { padding: 1rem; text-align: center; font-size: 0.9em; }
       .error { color: #F44336; }
 
-      /* Color Picker Modal */
       .color-picker-modal {
             position: absolute;
-            top: 250px; /* Позиционируем ниже карты */
-            background: rgba(21, 21, 25, 0.95); /* Темный фон, как у кнопок */
+            background: rgba(21, 21, 25, 0.95); 
             border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Более темная тень */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
             display: flex;
-            flex-direction: column; /* Вертикальное расположение */
-            gap: 5px; /* Уменьшенный отступ между элементами */
-            z-index: 20; /* Выше кнопки редактирования */
-            opacity: 0; /* Изначально скрыт */
-            visibility: hidden; /* Изначально скрыт */
-            transform: translateY(-10px); /* Небольшое смещение для анимации */
+            flex-direction: column; 
+            gap: 5px; 
+            z-index: 20; 
+            opacity: 0; 
+            visibility: hidden; 
+            transform: translateY(-10px); 
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            width: fit-content; /* Ширина по содержимому */
-            margin-top: 10px; /* Отступ от кнопки */
-            border: #404042 1px solid; /* Граница как у кнопок */
+            width: fit-content; 
+            border: #404042 1px solid; 
         }
         .color-picker-modal.visible {
             opacity: 1; visibility: visible;
@@ -490,17 +616,17 @@
         .color-option {
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            padding: 8px 15px; /* Увеличенный padding для лучшей области нажатия */
+            padding: 8px 15px; 
             border-radius: 8px;
             transition: background-color 0.1s ease;
-            min-width: 120px; /* Минимальная ширина для единообразия */
+            min-width: 120px; 
         }
         .color-option:hover {
-            background-color: rgba(255, 255, 255, 0.05); /* Светлый фон при наведении */
+            background-color: rgba(255, 255, 255, 0.05); 
         }
         .color-option:hover { background-color: rgba(255, 255, 255, 0.12); }
         .color-name {
-            color: #e0e0e0; /* Lighter text */
+            color: #e0e0e0; 
             font-size: 0.9rem;
             font-family: 'Nunito', sans-serif;
             font-weight: 500;
@@ -533,7 +659,7 @@
 
       @media (max-width: 600px) {
         .navbar {
-          background-color: #0D0D11;
+          background-color: #0D0D11; 
           backdrop-filter: none;
           border-bottom: #1d1d23 1px solid;
         }
@@ -546,23 +672,34 @@
           width: 100%;
           height: auto;
           padding: 1rem;
-          display: none;
           border-bottom: #1d1d23 1px solid;
           border-left: none;
           box-shadow: none;
-          transform: translateX(100%); /* Start off-screen to the right */
+          transform: translateX(100%); 
           transition: transform 0.3s ease-in-out;
         }
         .side-menu.open {
-          display: flex;
-          transform: translateX(0); /* Slide in */
+          transform: translateX(0); 
         }
         body {
-          overflow: auto;
+          overflow-y: auto; 
         }
 
         .main-content{
             overflow-y: auto;
+            position: static;
+            height: auto;
+        }
+
+        .main-content > div {
+             position: static;
+             height: auto;
+             padding: 16px; 
+             margin-bottom: 1rem; 
+        }
+
+        .main-content > div:not(.visible) {
+             display: none;
         }
 
         #bank-page {
@@ -591,5 +728,38 @@
           justify-content: start;
           gap: 1rem;
           height: auto;
+        }
+
+        .transaction-list, .fines-list {
+            overflow-x: auto; 
+        }
+        .transaction-item {
+            min-width: 300px; 
+            flex-wrap: wrap; 
+            gap: 0.5rem 1rem; 
+        }
+        .transaction-item span, .transaction-item div {
+            flex: unset !important; 
+            width: auto !important; 
+        }
+        .transaction-item .transaction-amount {
+            flex: 0 0 auto !important; 
+            min-width: 80px; 
+        }
+        .transaction-item .transaction-type {
+             flex: 0 0 auto !important;
+        }
+        .transaction-item .transaction-date {
+             flex: 0 0 auto !important;
+        }
+         .transaction-reason-cell {
+            flex: 1 1 100% !important; 
+         }
+         .transaction-arrow {
+             display: none; 
+         }
+
+        .modal-button {
+           padding: 0.75rem 1rem; 
         }
       }
