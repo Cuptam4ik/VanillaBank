@@ -1,765 +1,442 @@
-body,
-      html {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        /* Removed background image */
-        background-color: #0D0D11; /* Base dark background */
-        color: #ffffff; /* Default text color */
-      }
-      html, input, button {
-        font-family: "Ubuntu", sans-serif;
-        font-weight: 500;
-      }
-      body {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-      }
-      .navbar {
-        width: 100%;
-        height: 60px;
-        backdrop-filter: blur(10px);
-        background-color: rgba(13, 13, 17, 0.5); /* Semi-transparent dark background */
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 24px;
-        box-sizing: border-box;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.138);
-        z-index: 10;
-        min-height: 4rem;
-      }
-      .navbar .logo {
-        font-size: 1.5rem;
-        color: #ffffff;
-        letter-spacing: 1px;
-        cursor: pointer;
-        font-family: "Audiowide", sans-serif;
-        display: flex;
-        align-items: center;
-      }
-      .navbar .hamburger {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 20;
-        color: #ffffff;
-        transition: transform 0.2s ease-in-out; /* Hamburger animation */
-      }
-      .navbar .hamburger:hover {
-          transform: scale(1.1);
-      }
-       .navbar .hamburger:active {
-          transform: scale(0.9);
-      }
-
-
-      .side-menu {
-        position: fixed;
-        top: 0;
-        right: -260px; /* Start off-screen */
-        width: 260px;
-        height: 100%;
-        background: #0D0D11;
-        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
-        transition: right 0.15s ease-in-out;
-        z-index: 15;
-        display: flex;
-        flex-direction: column;
-        padding: 80px 24px 24px 24px; /* Top padding for navbar */
-        box-sizing: border-box;
-        border-left: #1d1d23 1px solid;
-      }
-      .side-menu.open {
-        right: 0; /* Slide in */
-      }
-      .side-menu button.menu { /* General style for menu buttons */
-        margin-bottom: 0.5rem;
-        transition: background-color 0.2s, transform 0.1s; /* Added transform for hover/active */
-      }
-      .side-menu button.menu:hover {
-          transform: translateX(5px); /* Subtle slide on hover */
-      }
-      .side-menu button.menu:active {
-          transform: scale(0.98); /* Subtle press on active */
-      }
-      .side-menu.exit {
-        color: #EA4242;
-      }
-       .side-menu button.exit:hover {
-        background-color: rgba(251, 72, 72, 0.1);
-        transform: translateX(5px); /* Still slide on hover */
-      }
-       .side-menu button.exit:active {
-        transform: scale(0.98); /* Still press on active */
-       }
-
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(5px);
-        z-index: 12; /* Below side-menu and modals */
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-      .overlay.show {
-        display: block;
-        opacity: 1;
-      }
-      .main-content {
-        flex-grow: 1;
-        padding: 0; /* Remove padding from main-content, apply to pages instead */
-        overflow-y: hidden;
-        overflow-x: hidden;
-        position: relative; 
-      }
-
-      /* Page transition styles */
-      .main-content > div {
-          position: absolute; 
-          top: 0; left: 0; right: 0; bottom: 0;
-          padding: 16px; 
-          box-sizing: border-box;
-          width: 100%;
-          height: 100%;
-          display: none; /* Initially hide all pages */
-          flex-direction: column; 
-          opacity: 0;
-          visibility: hidden;
-          transform: translateY(20px);
-          transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, transform 0.5s ease-in-out;
-          overflow-y: auto; /* Allow scrolling within the page */
-      }
-      
-      .main-content > div.visible {
-          display: flex; /* Make visible pages flex */
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0); /* Slide to normal position */
-      }
-      
-       /* Welcome div needs special handling for positioning and display */
-       #welcome-div {
-            position: relative; 
-            padding: 0; 
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            transform: none; /* Reset transform */
-            display: none; /* Initially hidden */
-       }
-       
-       #welcome-div.visible {
-           display: flex; /* Show as flex */
-           opacity: 1;
-           visibility: visible;
-           transform: none; /* Ensure no transform */
-       }
-       
-       .centered-div#welcome-div .additional-info {
-        position: absolute;
-        bottom: 16px;
-        right: 16px;
-        color: rgba(255, 255, 255, 0.5); 
-        font-size: 0.875rem;
-      }
-
-      /* Page specific styles */
-      #bank-page {
-         flex-direction: column;
-         gap: 2rem; 
-      }
-
-      .bank-main{ 
-        display: flex;
-        flex-wrap: wrap; 
-        gap: 2rem;
-        width: 100%;
-      }
-
-      .bank-personal-transactions{
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      #bank-management-page {
-        gap: 2rem;
-        width: 100%;
-        align-items: start;
-        justify-content: space-between;
-        flex-wrap: wrap;
-      }
-
-      #bank-management-page button {
-        flex: 1;
-        min-width: 30vw;
-      }
-
-      #inspector-page {
-        gap: 2rem;
-      }
-
-      #bank-transactions-page {
-        color: #ffffff;
-        flex-direction: column;
-        gap: 1rem;
-        height: 100%;
-        width: 100%;
-      }
-      
-      .card {
-        border-radius: 1rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        color: #ffffff;
-        max-width: 500px;
-        min-width: 300px;
-        width: 100%;
-        aspect-ratio: 1.6;
-        display: flex;
-        flex-direction: column;
-        border: 1px solid #ffffff2c;
-        background: linear-gradient(135deg, #EA4242 0%, #C0392B 100%); /* Default */
-      }
-      .card .card-header { display: flex; gap: 1rem; padding: 1rem; align-items: center; }
-      .card .card-body { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
-      .card .card-footer { display: flex; padding: 1rem; justify-content: space-between; align-items: end; }
-      .card #card-balance { font-size: 2rem; }
-      .card #card-number { font-size: 1.25rem; }
-      .card #card-holder { font-size: 1.5rem; }
-      .card #card-edit-btn { cursor: pointer; display: block; }
-
-      .bank-operations { 
-        display: flex;
-        flex-grow: 1; 
-        flex-direction: column; 
-        gap: 1rem;
-        align-items: stretch; 
-      }
-      .bank-operations button.action {
-        justify-content: center; 
-         transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; 
-      }
-       .bank-operations button.action:hover {
-         transform: translateY(-4px); 
-         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
-       }
-        .bank-operations button.action:active {
-          transform: scale(0.96); 
-           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); 
-        }
-
-
-      .bank-personal-transactions, .overdue-fines-section {
-        width: 100%;
-        margin-top: 1rem; 
-      }
-      .card #card-balance {
-        font-size: 2rem;
-        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
-      }
-      .card #card-number {
-        font-size: 1.25rem;
-        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
-      }
-
-      .card .card-balance-div{
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .card #card-holder {
-        font-size: 1.5rem;
-        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
-      }
-      .card #card-edit-btn {
-        cursor: pointer;
-        display: block;
-        text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.114);
-        transition: transform 0.2s ease-in-out; 
-      }
-      .card #card-edit-btn:hover {
-          transform: scale(1.1); 
-      }
-       .card #card-edit-btn:active {
-          transform: scale(0.9); 
-      }
-
-      .shadow-icon {
-        filter: drop-shadow(0px 1px 5px rgba(0, 0, 0, 0.114));
-      }
-
-      #bank-management-page, #inspector-page {
-        align-items: flex-start;
-        justify-content: flex-start;
-        flex-wrap: wrap; 
-      }
-       #bank-management-page button.action, #inspector-page button.action {
-           transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; 
-       }
-        #bank-management-page button.action:hover, #inspector-page button.action:hover {
-             transform: translateY(-4px);
-             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        #bank-management-page button.action:active, #inspector-page button.action:active {
-           transform: scale(0.96);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-      .body-gray {
-        background-color: #1a1a2e; 
-        background-image: none;
-      }
-      .filler { flex-grow: 1; }
-
-
-      button{
-        padding: 1rem 1.5rem;
-        font-size: 1rem;
-        background: #ffffff; 
-        color: #222;
-        border: none;
-        border-radius: 1.25rem;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s, box-shadow 0.2s; 
-        text-align: center;
-        font-family: "Nunito", sans-serif; 
-         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-      }
-      button:hover {
-          background: #dfdfdf;
-          transform: translateY(-2px); 
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
-       }
-      button:active {
-          transform: scale(0.98); 
-          background: #cfcfcf;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); 
-       }
-
-
-      button.action {
-        background-color: #151519; 
-        color: #ffffff;
-        border: #404042 1px solid;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      button.menu {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        gap: 1rem;
-        background-color: transparent;
-        color: #ffffff;
-        width: 100%;
-        text-align: left;
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        box-shadow: none; 
-      }
-
-      button.menu:hover {
-        background-color: #151519;
-        box-shadow: none; 
-      }
-       button.menu:active {
-           box-shadow: none; 
-       }
-
-
-      button.exit {
-        color: #ce3c3c;
-      }
-
-      .modal {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: none; 
-        align-items: center; 
-        justify-content: center;
-        z-index: 1000; 
-        padding: 1rem;
-        box-sizing: border-box;
-      }
-      .modal-content {
-        background: #0D0D11;
-        padding: 1.5rem 2rem; 
-        border-radius: 1.25rem;
-        border: #1d1d23 1px solid;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        display: flex; flex-direction: column; gap: 1rem;
-        max-width: 32rem;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .modal-title { font-size: 1.25rem; color: #ffffff; margin: 0 0 0.5rem 0; }
-      .modal-input {
-        padding: 0.9rem 0.75rem;
-        border: 1px solid #585858;
-        border-radius: 0.5rem;
-        background-color: #16161b;
-        color: #ffffff;
-        font-size: 1rem;
-        box-sizing: border-box;
-        width: 100%;
-        font-family: "Nunito", sans-serif;
-      }
-      .modal-button {
-        background: linear-gradient(135deg, #371F6F 0%, #9C27B0 100%);
-        color: #ffffff;
-        border: none;
-        padding: 0.85rem 1.5rem;
-        border-radius: 1.25rem; 
-        cursor: pointer; 
-        transition: background 0.2s, transform 0.2s; 
-        font-family: "Nunito", sans-serif; 
-         box-shadow: 0 4px 10px rgba(156, 39, 176, 0.3); 
-      }
-      .modal-button:hover {
-        background: linear-gradient(135deg, #4A2B8A 0%, #AD35C7 100%);
-        transform: scale(1.02); 
-         box-shadow: 0 6px 14px rgba(173, 53, 199, 0.4); 
-      }
-      .modal-button:active {
-         transform: scale(0.98); 
-         box-shadow: 0 2px 6px rgba(156, 39, 176, 0.3); 
-      }
-
-
-      .modal-button.gray-button {
-        background-color: #4a4a4e; 
-        color: #e0e0e0;
-        background: none; 
-        box-shadow: none; 
-      }
-      .modal-button.gray-button:hover {
-        background-color: #5f5f63;
-        background: none; 
-        box-shadow: none; 
-      }
-       .modal-button.gray-button:active {
-           background-color: #4a4a4e;
-           box-shadow: none;
-       }
-
-      .modal-status {
-        display: none;
-        padding: 0.75rem;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-        border: 1px solid #585858;
-        border-radius: 0.5rem;
-        background-color: #2e2e32;
-        text-align: center;
-      }
-
-      .transaction-list, .fines-list {
-        display: flex; flex-direction: column; align-items: stretch;
-        width: 100%;
-        margin-bottom: 1rem;
-        overflow-x: auto;
-      }
-
-      .transaction-page-title{
-        margin: 0;
-        font-size: 1.5rem;
-      }
-
-      .transaction-item {
-        display: flex;
-        gap: 1rem;
-        font-size: 1rem;;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background-color: #151519;
-        border: 1px solid #2e2e32;
-        border-top: none;
-        min-width: 70rem;
-      }
-
-      .transaction-item:nth-child(1) {
-        background-color: #1d1d23;
-        border-radius: 1rem 1rem 0 0;
-        border: 1px solid #2e2e32;
-      }
-      .transaction-item:nth-last-child(1) {
-        border-radius: 0 0 1rem 1rem;
-    }
-
-      .transaction-item div {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        flex: 1;
-      }
-
-      .transaction-item span {
-        flex: 1;
-      }
-
-      .transaction-arrow {
-         flex: 0 0 auto; 
-         display: flex; 
-         align-items: center;
-      }
-
-
-      .transaction-reason-cell {
-        flex: 1.5 !important;
-        word-break: break-word;
-        white-space: pre-wrap;
-      }
-
-      .transaction-card-number {
-        font-size: 0.875rem;
-        color: #d2d2d2;
-      }
-
-      .fine-item {
-        display: flex; flex-wrap: wrap;
-        gap: 0.5rem 1rem;
-        font-size: 0.95rem; 
-        justify-content: space-between;
-        border-bottom: 1px solid #2e2e32;
-        align-items: center;
-        padding: 0.85rem 1rem; 
-      }
-
-
-      .fine-details { 
-        display: flex; flex-direction: column; align-items: flex-start;
-        flex: 1 1 120px;
-        min-width: 100px;
-      }
-      .fine-details .fine-amount { font-weight: bold; }
-      .fine-details .fine-duedate, .fine-details span:not(.fine-amount) {
-        font-size: 0.875em; color: #ffffff;
-      }
-      .fine-details .fine-amount { color: #4DD0E1; font-size: 1.125em; }
-      .fine-details span { display: block; margin-bottom: 0.15rem; }
-
-
-      .pay-fine-btn {
-        padding: 0.5rem 1rem !important; 
-        font-size: 0.9rem !important;
-        background-color: #4CAF50 !important; 
-        color: white !important;
-        border-radius: 0.5rem !important;
-        margin-left: auto; 
-        flex-shrink: 0; 
-         transition: background-color 0.2s, transform 0.1s; 
-          box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3); 
-      }
-      .pay-fine-btn:hover {
-          background-color: #45a049 !important;
-           transform: scale(1.02); 
-           box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); 
-       }
-       .pay-fine-btn:active {
-           transform: scale(0.98); 
-           box-shadow: 0 1px 3px rgba(76, 175, 80, 0.3); 
-       }
-
-      .notification-dot {
-        background-color: #F44336; color: white; 
-        border-radius: 50%;
-        padding: 1px 5px; 
-        font-size: 0.875em; 
-        margin-left: 5px;
-        display: inline-block;
-        line-height: 1; 
-        vertical-align: super; 
-      }
-
-      .info, .error { padding: 1rem; text-align: center; font-size: 0.9em; }
-      .error { color: #F44336; }
-
-      .color-picker-modal {
-            position: absolute;
-            background: rgba(21, 21, 25, 0.95); 
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
-            display: flex;
-            flex-direction: column; 
-            gap: 5px; 
-            z-index: 20; 
-            opacity: 0; 
-            visibility: hidden; 
-            transform: translateY(-10px); 
-            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            width: fit-content; 
-            border: #404042 1px solid; 
-        }
-        .color-picker-modal.visible {
-            opacity: 1; visibility: visible;
-            transform: translateY(0) scale(1);
-        }
-        .color-option {
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            padding: 8px 15px; 
-            border-radius: 8px;
-            transition: background-color 0.1s ease;
-            min-width: 120px; 
-        }
-        .color-option:hover {
-            background-color: rgba(255, 255, 255, 0.05); 
-        }
-        .color-option:hover { background-color: rgba(255, 255, 255, 0.12); }
-        .color-name {
-            color: #e0e0e0; 
-            font-size: 0.9rem;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 500;
-        }
-
-        canvas#stars {
-        position: fixed;
-        z-index: -1;
-        width: 100%;
-        height: 100%;
-      }
-
-      a {
-        position: absolute;
-        bottom: 2vmin;
-        right: 2vmin;
-        color: rgba(255,255,255,0.1);
-        text-decoration: none;
-      }
-
-      a:hover {
-        color: #fff;
-      }
-
-      .row-center {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-      }
-
-      @media (max-width: 600px) {
-        .navbar {
-          background-color: #0D0D11; 
-          backdrop-filter: none;
-          border-bottom: #1d1d23 1px solid;
-        }
-        .overlay {
-          top: 4rem;
-        }
-        .side-menu {
-          position: fixed;
-          top: 3.9rem;
-          width: 100%;
-          height: auto;
-          padding: 1rem;
-          border-bottom: #1d1d23 1px solid;
-          border-left: none;
-          box-shadow: none;
-          transform: translateX(100%); 
-          transition: transform 0.3s ease-in-out;
-        }
-        .side-menu.open {
-          transform: translateX(0); 
-        }
-        body {
-          overflow-y: auto; 
-        }
-
-        .main-content{
-            overflow-y: auto;
-            position: static;
-            height: auto;
-        }
-
-        .main-content > div {
-             position: static;
-             height: auto;
-             padding: 16px; 
-             margin-bottom: 1rem; 
-        }
-
-        .main-content > div:not(.visible) {
-             display: none;
-        }
-
-        #bank-page {
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .bank-personal-transactions {
-          width: 100%;
-          max-width: 100%;
-        }
-
-        .bank-operations {
-          gap: 1rem;
-          align-items: stretch;
-        }
-
-        .card {
-          width: 100%;
-          max-width: 100%;
-        }
-
-        #bank-management-page{
-          flex-direction: column;
-          align-items: stretch;
-          justify-content: start;
-          gap: 1rem;
-          height: auto;
-        }
-
-        .transaction-list, .fines-list {
-            overflow-x: auto; 
-        }
-        .transaction-item {
-            min-width: 300px; 
-            flex-wrap: wrap; 
-            gap: 0.5rem 1rem; 
-        }
-        .transaction-item span, .transaction-item div {
-            flex: unset !important; 
-            width: auto !important; 
-        }
-        .transaction-item .transaction-amount {
-            flex: 0 0 auto !important; 
-            min-width: 80px; 
-        }
-        .transaction-item .transaction-type {
-             flex: 0 0 auto !important;
-        }
-        .transaction-item .transaction-date {
-             flex: 0 0 auto !important;
-        }
-         .transaction-reason-cell {
-            flex: 1 1 100% !important; 
-         }
-         .transaction-arrow {
-             display: none; 
-         }
-
-        .modal-button {
-           padding: 0.75rem 1rem; 
-        }
-      }
+/* --- ROOT VARIABLES --- */
+:root {
+  --bg-color: #121218;
+  --card-bg: #1E1E2A;
+  --card-border-color: rgba(138, 43, 226, 0.2);
+  --text-color: #F0F0F0;
+  --text-muted: #A0A0B0;
+  --primary-accent: #8B5CF6; /* Muted Violet */
+  --gradient: linear-gradient(135deg, #6d28d9, #4338ca);
+  --danger-color: #EA4242;
+  --success-color: #4CAF50;
+  --glow-color-primary: rgba(139, 92, 246, 0.3);
+  --border-radius-main: 1rem;
+  --border-radius-small: 0.75rem;
+  --font-main: "Inter", sans-serif;
+  --font-display: "Poppins", sans-serif;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- GENERAL STYLES --- */
+body, html {
+  height: 100%; margin: 0; padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-main);
+}
+
+body { display: flex; flex-direction: column; height: 100vh; }
+html, input, button { font-weight: 500; }
+
+/* --- NAVBAR --- */
+.navbar {
+  height: 60px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(18, 24, 24, 0.3);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10; min-height: 4rem;
+  animation: fadeIn 0.5s ease-out;
+}
+.navbar .logo {
+  font-size: 1.5rem; color: var(--text-color);
+  cursor: pointer; font-family: var(--font-display);
+  display: flex; align-items: center;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.navbar .hamburger {
+  cursor: pointer; z-index: 20; color: var(--text-color);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+/* --- ИСПРАВЛЕННЫЙ БЛОК --- */
+.navbar .hamburger:hover {
+  /* transform: scale(1.15) rotate(90deg);  <-- Эта строка удалена или закомментирована */
+  color: var(--primary-accent);
+}
+
+/* --- SIDE MENU & OVERLAY --- */
+.side-menu {
+  position: fixed; top: 0; right: -300px;
+  width: 280px; height: 100%;
+  background: rgba(18, 24, 24, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transition: right 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 15;
+  display: flex; flex-direction: column;
+  padding: 80px 24px 24px 24px;
+  box-sizing: border-box;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+.side-menu.open { right: 0; }
+
+.overlay {
+  display: none; position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 12;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.overlay.show { display: block; opacity: 1; }
+
+/* --- MAIN CONTENT & PAGE TRANSITIONS --- */
+.main-content {
+  flex-grow: 1; overflow-y: hidden;
+  position: relative;
+}
+.main-content > div {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  padding: 24px; box-sizing: border-box;
+  width: 100%; height: 100%;
+  display: none; flex-direction: column;
+  opacity: 0; visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.5s ease;
+  overflow-y: auto;
+}
+.main-content > div.visible {
+  display: flex; opacity: 1; visibility: visible;
+  transform: translateY(0);
+}
+#welcome-div {
+  position: relative; padding: 0;
+  width: 100%; height: 100%;
+  align-items: center; justify-content: center;
+  transform: none; display: none;
+}
+#welcome-div.visible {
+  display: flex; opacity: 1; visibility: visible; transform: none;
+}
+.filler { flex-grow: 1; }
+
+/* --- BANK CARD --- */
+.card {
+  border-radius: var(--border-radius-main);
+  color: #ffffff;
+  max-width: 500px; min-width: 300px;
+  width: 100%; aspect-ratio: 1.6;
+  display: flex; flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--gradient);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37), 0 0 20px -5px var(--glow-color-primary);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 0;
+  flex-shrink: 0; /* Prevent card from shrinking */
+}
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 40px 0 rgba(0,0,0,0.4), 0 0 30px 0px var(--glow-color-primary);
+}
+.card .card-header, .card .card-footer { padding: 1.25rem; z-index: 1; }
+.card .card-header { display: flex; gap: 1rem; align-items: center; }
+.card .card-body { flex-grow: 1; }
+.card .card-footer { display: flex; justify-content: space-between; align-items: end; }
+#card-balance { font-size: 2rem; font-weight: 700; font-family: var(--font-display); }
+#card-number { font-size: 1.25rem; font-family: var(--font-main); letter-spacing: 1px; }
+#card-holder { font-size: 1.5rem; font-family: var(--font-display); font-weight: 600; }
+#card-edit-btn { cursor: pointer; transition: transform 0.2s ease, color 0.2s ease; }
+#card-edit-btn:hover { transform: scale(1.2); color: #fff; }
+.card .card-balance-div { display: flex; align-items: center; gap: 0.5rem; }
+.shadow-icon { filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); }
+
+/* --- BUTTONS --- */
+button {
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--primary-accent);
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+button:hover {
+  background: var(--glow-color-primary);
+  border-color: var(--primary-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+button:active { transform: scale(0.98); }
+
+button.action, .modal-button {
+  background: var(--gradient);
+  border: none;
+  box-shadow: 0 4px 20px var(--glow-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+button.action:hover, .modal-button:hover {
+  box-shadow: 0 6px 25px var(--glow-color-primary);
+  background: var(--gradient);
+  transform: translateY(-3px);
+}
+
+button.menu {
+  display: flex; align-items: center; justify-content: start;
+  gap: 1rem; background-color: transparent;
+  width: 100%; text-align: left;
+  padding: 0.75rem 1rem;
+  border: none;
+  box-shadow: none;
+}
+button.menu:hover {
+  background-color: var(--glow-color-primary);
+  transform: translateX(10px);
+  color: var(--primary-accent);
+  box-shadow: none;
+}
+button.exit { color: var(--danger-color); }
+button.exit:hover { color: white; background-color: rgba(234, 66, 66, 0.3); }
+
+/* --- MODALS --- */
+.modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem; box-sizing: border-box;
+}
+.modal.visible, .modal[style*="display: flex"] {
+    animation: fadeIn 0.3s ease;
+}
+.modal-content {
+  background: var(--card-bg);
+  padding: 1.5rem 2rem;
+  border-radius: var(--border-radius-main);
+  border: 1px solid var(--card-border-color);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 1rem;
+  max-width: 32rem; width: 100%;
+  animation: fadeInScale 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.modal-title {
+  font-size: 1.5rem; color: var(--text-color); margin: 0 0 0.5rem 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.modal-input {
+  padding: 0.9rem;
+  border: 1px solid #3e3e4a;
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-color);
+  color: var(--text-color); font-size: 1rem;
+  width: 100%; box-sizing: border-box; font-family: var(--font-main);
+  transition: all 0.3s ease;
+}
+.modal-input:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 15px var(--glow-color-primary);
+  background-color: var(--bg-color);
+}
+.modal-button.gray-button {
+  background: #3e3e4a;
+  box-shadow: none;
+}
+.modal-button.gray-button:hover { background: #50505c; }
+.modal-status {
+  display: none; padding: 0.75rem; font-size: 0.9rem;
+  margin-top: 0.5rem;
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-color);
+  border: 1px solid #3e3e4a; text-align: center;
+}
+
+/* --- TRANSACTION & FINES LISTS --- */
+.transaction-list, .fines-list {
+  display: flex; flex-direction: column;
+  width: 100%; overflow: visible;
+  gap: 0.75rem;
+}
+.transaction-page-title, .transaction-title {
+  margin: 0; font-size: 1.5rem; display: flex; gap: 1rem; align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--card-border-color);
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.transaction-item, .fine-item {
+  display: flex; gap: 1rem;
+  justify-content: space-between; align-items: center;
+  padding: 1rem;
+  background: var(--card-bg);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-main);
+  min-width: 70rem;
+  opacity: 0;
+  animation: slideInUp 0.5s ease-out forwards;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+.transaction-item:hover, .fine-item:hover {
+  border-color: var(--card-border-color);
+  transform: translateY(-2px);
+}
+.transaction-item div {
+  display: flex; flex-direction: column; align-items: start; flex: 1;
+}
+.transaction-item span { flex: 1; }
+.transaction-arrow { flex: 0 0 auto; display: flex; align-items: center; color: var(--text-muted); }
+.transaction-reason-cell { flex: 1.5 !important; word-break: break-word; white-space: pre-wrap; color: var(--text-muted); }
+.transaction-card-number { font-size: 0.875rem; color: var(--text-muted); }
+
+/* --- FINES SPECIFIC STYLES --- */
+.fine-item {
+  flex-wrap: wrap; min-width: auto;
+  gap: 0.5rem 1rem;
+}
+.fine-details { flex: 1 1 120px; min-width: 100px; display: flex; flex-direction: column; align-items: flex-start; }
+.fine-details .fine-amount { font-weight: bold; color: var(--primary-accent); font-size: 1.125em; }
+.fine-details span { display: block; margin-bottom: 0.15rem; }
+.pay-fine-btn {
+  padding: 0.5rem 1rem !important; font-size: 0.9rem !important;
+  background: var(--success-color) !important; color: white !important;
+  border-radius: var(--border-radius-small) !important;
+  border: none !important;
+  margin-left: auto; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+}
+.pay-fine-btn:hover {
+  background-color: #5cb85c !important; transform: scale(1.05);
+}
+
+/* --- OTHER UI ELEMENTS --- */
+#bank-page, #bank-management-page, #inspector-page, #bank-transactions-page {
+  gap: 2rem;
+}
+
+/* --- BANK PAGE LAYOUT --- */
+.bank-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.bank-operations {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex-grow: 1;
+}
+
+/* --- Dark Button Style --- */
+.bank-operations .action {
+  background: var(--card-bg);
+  border: 1px solid #3e3e4a;
+  box-shadow: none;
+  justify-content: center;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+}
+
+.bank-operations .action:hover,
+.bank-operations .action:focus {
+  background: var(--card-bg);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 15px var(--glow-color-primary);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.notification-dot {
+  background-color: var(--danger-color);
+  border-radius: 50%; padding: 2px 6px; font-size: 0.8em;
+  margin-left: 5px; line-height: 1; vertical-align: middle;
+  box-shadow: 0 0 10px rgba(234, 66, 66, 0.7);
+}
+.info, .error {
+  padding: 1rem; text-align: center; font-size: 1em;
+  background: var(--card-bg); border-radius: var(--border-radius-main);
+}
+.error { color: var(--danger-color); border: 1px solid var(--danger-color);}
+
+.color-picker-modal {
+  position: absolute; background: var(--card-bg);
+  border-radius: var(--border-radius-small);
+  padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 5px; z-index: 20;
+  opacity: 0; visibility: hidden;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.3s ease;
+  border: 1px solid var(--card-border-color);
+}
+.color-picker-modal.visible { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.color-option {
+  cursor: pointer; padding: 8px 15px;
+  border-radius: 6px; transition: background-color 0.2s ease;
+}
+.color-option:hover { background-color: rgba(255,255,255,0.1); }
+
+canvas#stars { display: none; }
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 900px) { /* Adjusted breakpoint for better transition */
+  .bank-main {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: stretch; /* Make card and buttons full width */
+  }
+  .bank-operations {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .transaction-item {
+    min-width: auto;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .transaction-item .transaction-arrow {
+     transform: rotate(90deg);
+     align-self: center;
+     margin: 0.5rem 0;
+  }
+}
+
+@media (max-width: 600px) {
+  body { overflow-y: auto; }
+  .navbar { backdrop-filter: none; background: var(--bg-color); }
+  .overlay { top: 4rem; }
+  .side-menu {
+    top: 4rem; width: 100%; height: auto;
+    padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-left: none; transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .side-menu.open { transform: translateX(0); }
+  .main-content { overflow-y: auto; position: static; height: auto; }
+  .main-content > div { position: static; height: auto; padding: 16px; margin-bottom: 1rem; }
+  .main-content > div:not(.visible) { display: none; }
+  #bank-page, #bank-management-page { flex-direction: column; align-items: stretch; }
+  .card, .bank-operations { width: 100%; max-width: 100%; }
+  .transaction-item .transaction-arrow { display: block; }
+}

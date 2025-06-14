@@ -21,11 +21,11 @@ REQUIRED_CALLER_ROLE_ID = None
 # Using the banker's IDs here will result in inspectors being called in the banker channel
 # and the banker role being pinged.
 INSPECTOR_CALL_CHANNEL_ID = 1379375240366395413  # <<-- CHANGE THIS to your Inspector Call Channel ID
-INSPECTOR_ROLE_ID = 1379374993145860226             # <<-- CHANGE THIS to your Inspector Role ID
+INSPECTOR_ROLE_ID = 1383389356592599070             # <<-- CHANGE THIS to your Inspector Role ID
 
 # --- NEW: Secret for Bot API ---
 # MUST MATCH THE SECRET IN server.js and be changed to something secure!
-BOT_API_SECRET = ""
+BOT_API_SECRET = "sk-AppXYZ-AuthToken-QWERTY12345"
 
 # --- INTENTS SETTINGS ---
 intents = discord.Intents.default()
