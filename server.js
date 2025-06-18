@@ -4,10 +4,9 @@ const path = require('path');
 const http = require('http');
 const { Server } = require("socket.io");
 const { PrismaClient, OperationBy, TransactionType } = require('@prisma/client');
-const bcrypt = require('bcryptjs'); // ИСПРАВЛЕНО: Заменено на bcryptjs для лучшей совместимости
+const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { spawn } = require('child_process');
-// require('dotenv').config(); // ПОЛНОСТЬЮ УДАЛЕНО
 
 const prisma = new PrismaClient();
 const app = express();
@@ -180,7 +179,7 @@ async function userAuth(req, res, next) {
     next();
 }
 
-// --- ИСПРАВЛЕНО: ЕДИНЫЙ МАРШРУТ ДЛЯ ПОИСКА ПОЛЬЗОВАТЕЛЕЙ (С ОПТИМИЗАЦИЕЙ) ---
+// --- ЕДИНЫЙ МАРШРУТ ДЛЯ ПОИСКА ПОЛЬЗОВАТЕЛЕЙ (С ОПТИМИЗАЦИЕЙ) ---
 app.get('/api/users/search', userAuth, async (req, res) => {
     const { nickname, cardNumber } = req.query;
 
@@ -202,7 +201,7 @@ app.get('/api/users/search', userAuth, async (req, res) => {
                 select: { nickname: true, cardNumber: true }
             });
         } else if (cardNumber) {
-            // ИСПРАВЛЕНО: Эффективный поиск по номеру карты с использованием диапазона
+            // Эффективный поиск по номеру карты с использованием диапазона
             const query = String(cardNumber);
             const CARD_NUMBER_LENGTH = 5; // Длина номера карты (10000-99999)
             if (query.length > 0 && query.length <= CARD_NUMBER_LENGTH) {
@@ -887,7 +886,7 @@ function startPythonBot() {
     pythonBotProcess.on('exit', (code, signal) => {
         console.log(`Python Discord bot process exited with code ${code} and signal ${signal}`);
         pythonBotProcess = null;
-        if (code !== 0 && signal !== 'SIGINT') { // Убрано process.env
+        if (code !== 0 && signal !== 'SIGINT') { 
             console.log('Attempting to restart Python bot in 5 seconds...');
             setTimeout(startPythonBot, 5000);
         }
@@ -897,7 +896,7 @@ function startPythonBot() {
 // Start the server
 server.listen(PORT, () => {
     console.log(`Node.js Server is running on http://localhost:${PORT}`);
-    startPythonBot(); // Запускаем бота всегда, раз нет .env
+    startPythonBot(); 
 });
 
 // Graceful shutdown

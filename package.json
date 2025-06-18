@@ -15,7 +15,7 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^6.8.2",
-    "bcryptjs": "^3.0.2",
+    "bcrypt": "^6.0.0",
     "chart.js": "^4.5.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
