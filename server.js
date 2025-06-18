@@ -4,7 +4,6 @@ const path = require('path');
 const http = require('http');
 const { Server } = require("socket.io");
 const { PrismaClient, OperationBy, TransactionType } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { spawn } = require('child_process');
 
@@ -132,7 +131,9 @@ app.post('/api/login', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { nickname } });
         if (!user) return res.status(404).json({ message: 'Пользователь не найден!' });
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        
+        // Убрано сравнение хеша, теперь простое сравнение строк
+        const passwordMatch = (password === user.password);
         if (!passwordMatch) return res.status(401).json({ message: 'Введены неверные данные!' });
 
         const unpaidFinesCount = await prisma.fine.count({
@@ -155,10 +156,10 @@ app.post('/api/register', async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'Данное имя пользователя уже занято!' });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Убрано хеширование, пароль сохраняется в открытом виде (НЕБЕЗОПАСНО!)
         const newCardNumber = await generateUniqueCardNumber();
         const user = await prisma.user.create({
-            data: { cardNumber: newCardNumber, nickname, password: hashedPassword }
+            data: { cardNumber: newCardNumber, nickname, password: password }
         });
         req.session.userId = user.id;
         res.status(201).json({ message: 'Регистрация завершена успешно!', user: { ...user, unpaidFinesCount: 0 } });
