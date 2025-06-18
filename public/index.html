@@ -44,7 +44,25 @@
     <div class="modal" id="card-op-modal" style="display: none;">
       <div class="modal-content">
         <h2 id="card-op-modal-title" class="modal-title">Операция с картой</h2>
-        <input type="number" id="card-op-modal-input1" class="modal-input" placeholder="Введите данные" />
+        
+        <!-- НОВЫЙ ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА ПЕРЕВОДА -->
+        <div id="transfer-mode-selector" class="transfer-mode-toggle" style="display: none;">
+            <label>
+                <input type="radio" name="transferMode" value="card" checked>
+                <span>По карте</span>
+            </label>
+            <label>
+                <input type="radio" name="transferMode" value="nickname">
+                <span>По никнейму</span>
+            </label>
+        </div>
+        
+        <!-- ИЗМЕНЕННЫЙ INPUT ДЛЯ КАРТЫ/НИКА И КОНТЕЙНЕР ДЛЯ ПОДСКАЗОК -->
+        <div class="input-with-suggestions">
+            <input type="text" id="card-op-modal-input1" class="modal-input" placeholder="Введите данные" autocomplete="off" />
+            <div id="nickname-suggestions" class="suggestions-dropdown"></div>
+        </div>
+
         <input type="number" id="card-op-modal-input2" class="modal-input" placeholder="Введите сумму" />
         <input type="text" id="card-op-modal-input3" class="modal-input" placeholder="Причина (необязательно)" />
         <button id="card-op-modal-button" class="modal-button">Подтвердить</button>
@@ -73,6 +91,17 @@
         <button id="issue-fine-extended-modal-button" class="modal-button">Выдать</button>
         <div id="issue-fine-extended-modal-status" class="modal-status"></div>
       </div>
+    </div>
+    
+    <!-- Modal for detailed user profile view (Admin/Banker) -->
+    <div class="modal" id="profile-view-modal" style="display: none;">
+        <div class="modal-content large-modal">
+            <h2 class="modal-title">Профиль пользователя</h2>
+            <div id="profile-view-content">
+                <!-- Content will be loaded here -->
+            </div>
+            <button id="profile-view-modal-close-btn" class="modal-button gray-button" style="margin-top: 1rem;">Закрыть</button>
+        </div>
     </div>
 
     <!-- Modal for player's fines -->
@@ -150,6 +179,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"><path fill="currentColor" fill-rule="evenodd" d="M5 2a2 2 0 0 0-2 2v14l3.5-2l3.5 2l3.5-2l3.5 2V4a2 2 0 0 0-2-2zm2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m6.207.293a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414l6-6a1 1 0 0 0 0-1.414M12.5 10a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3" clip-rule="evenodd"/></svg>
         <span>Инспекторская</span>
       </button>
+       <button id="admin-panel-btn" class="menu" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11z"/></svg>
+          <span>Админ-панель</span>
+      </button>
       <button id="bank-transactions-btn" class="menu" style="display: none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M10.354 1.646a.5.5 0 0 0-.708.708L11.293 4H3.5a.5.5 0 0 0 0 1h7.793L9.646 6.646a.5.5 0 1 0 .708.708l2.5-2.5a.5.5 0 0 0 0-.708zm-4 7.708a.5.5 0 1 0-.708-.708l-2.5 2.5a.5.5 0 0 0 0 .708l2.5 2.5a.5.5 0 0 0 .708-.708L4.707 12H12.5a.5.5 0 0 0 0-1H4.707z"/></svg>
         <span>Транзакции</span>
@@ -186,7 +219,7 @@
         <div class="bank-operations">
              <button id="card-send-btn" class="action">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>
-                Перевод по карте
+                Перевод
             </button>
              <button id="player-fines-btn" class="action">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
@@ -211,25 +244,13 @@
        <div id="bank-management-page">
            <button id="check-balance-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/></svg>
-            <span>Посмотреть баланс</span></button>
+            <span>Посмотреть профиль</span></button>
            <button id="card-deposit-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 20H9v-8H4.16L12 4.16L19.84 12H15z"/></svg>
             Пополнить</button>
            <button id="card-withdraw-btn" class="action">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9 4h6v8h4.84L12 19.84L4.16 12H9z"/></svg>
             Списать</button>
-           <button id="add-banker-btn" class="action" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"/></svg>
-            Назначить банкира</button>
-           <button id="remove-banker-btn" class="action" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4-8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
-            Уволить банкира</button>
-           <button id="add-inspector-btn" class="action" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"/></svg>
-            Назначить инспектора</button>
-           <button id="remove-inspector-btn" class="action" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4-8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
-            Снять инспектора</button>
        </div>
        <div id="inspector-page">
            <button id="issue-fine-btn" class="action">
@@ -239,43 +260,103 @@
            <div class="overdue-fines-section">
                 <h3 class="transaction-title">Просроченные штрафы (выданные вами):</h3>
                 <div id="inspector-overdue-fines-list" class="transaction-list">
-                    <!-- Сюда будут загружаться просроченные штрафы -->
                     <div class="info">Нет просроченных штрафов.</div>
                 </div>
             </div>
        </div>
+       
+       <div id="admin-page">
+          <h2 class="transaction-page-title">Панель администратора</h2>
+          <!-- Stats Section -->
+          <div class="admin-section">
+              <div class="stats-container">
+                  <div class="stat-card">
+                      <span class="stat-card-title">Всего пользователей</span>
+                      <span class="stat-card-value" id="admin-stats-total-users">0</span>
+                  </div>
+                  <div class="stat-card">
+                      <span class="stat-card-title">Денег в системе</span>
+                      <span class="stat-card-value" id="admin-stats-total-money">0 аб</span>
+                  </div>
+                  <div class="stat-card">
+                      <span class="stat-card-title">Транзакций за 7 дней</span>
+                      <span class="stat-card-value" id="admin-stats-transactions">0</span>
+                  </div>
+              </div>
+              <div class="chart-container">
+                  <canvas id="transactions-chart"></canvas>
+              </div>
+          </div>
+          
+          <!-- Management Actions -->
+          <div class="admin-section">
+               <h3 class="transaction-title">Управление ролями</h3>
+               <div class="admin-actions-grid">
+                  <button id="add-banker-btn" class="action">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"/></svg>
+                      Назначить банкира</button>
+                  <button id="remove-banker-btn" class="action">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4-8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
+                      Уволить банкира</button>
+                  <button id="add-inspector-btn" class="action">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"/></svg>
+                      Назначить инспектора</button>
+                  <button id="remove-inspector-btn" class="action">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4-8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
+                      Снять инспектора</button>
+              </div>
+          </div>
+          
+           <!-- Users List Section -->
+           <div class="admin-section">
+               <h3 class="transaction-title">Пользователи</h3>
+               <input type="text" id="admin-user-search" class="modal-input" placeholder="Поиск по никнейму..." style="margin-bottom: 1rem;">
+               <div id="admin-user-list" class="user-list">
+                   <!-- Users will be loaded here -->
+               </div>
+           </div>
+           
+           <!-- Logs Section -->
+           <div class="admin-section">
+               <h3 class="transaction-title">Логи действий</h3>
+               <div id="admin-log-list" class="log-list">
+                   <!-- Logs will be loaded here -->
+               </div>
+           </div>
+       </div>
+       
        <div id="bank-transactions-page">
            <h2 class="transaction-title">Все транзакции</h2>
            <div id="transaction-list" class="transaction-list">
            </div>
        </div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      // --- General Elements ---
       const hamburgerBtn = document.getElementById("hamburger-btn");
       const sideMenu = document.getElementById("side-menu");
       const overlay = document.getElementById("overlay");
       const logo = document.getElementById("logo");
 
-      // Menu buttons
+      // --- Menu Buttons ---
       const bankBtn = document.getElementById("bank-btn");
       const bankManagmentBtn = document.getElementById("bank-managment-btn");
       const inspectorPanelBtn = document.getElementById("inspector-panel-btn");
+      const adminPanelBtn = document.getElementById("admin-panel-btn");
       const transactionsBtn = document.getElementById("bank-transactions-btn");
       const exitBtn = document.getElementById("exit-btn");
 
-      // Page divs
+      // --- Page Divs ---
       const welcomeDiv = document.getElementById("welcome-div");
       const bankPage = document.getElementById("bank-page");
       const bankManagementPage = document.getElementById("bank-management-page");
       const inspectorPage = document.getElementById("inspector-page");
+      const adminPage = document.getElementById("admin-page");
       const bankTransactionsPage = document.getElementById("bank-transactions-page");
-
-      // List of all page elements for easy handling
-      const allPages = [welcomeDiv, bankPage, bankManagementPage, inspectorPage, bankTransactionsPage];
-
+      const allPages = [welcomeDiv, bankPage, bankManagementPage, inspectorPage, adminPage, bankTransactionsPage];
 
       // --- Modals & Their Content ---
-      // Auth Modal
       const authModal = document.getElementById("auth-modal");
       const authUsernameInput = document.getElementById("auth-username");
       const authPasswordInput = document.getElementById("auth-password");
@@ -283,7 +364,6 @@
       const authRegButton = document.getElementById("auth-reg-button");
       const authModalStatus = document.getElementById("auth-modal-status");
 
-      // Card Operation Modal (2 inputs)
       const cardOpModal = document.getElementById("card-op-modal");
       const cardOpModalTitle = document.getElementById("card-op-modal-title");
       const cardOpModalInput1 = document.getElementById("card-op-modal-input1");
@@ -292,14 +372,12 @@
       const cardOpModalButton = document.getElementById("card-op-modal-button");
       const cardOpModalStatus = document.getElementById("card-op-modal-status");
 
-      // Card Operation Secondary Modal (1 input)
       const cardOpSecModal = document.getElementById("card-op-sec-modal");
       const cardOpSecModalTitle = document.getElementById("card-op-sec-modal-title");
       const cardOpSecModalInput = document.getElementById("card-op-sec-modal-input");
       const cardOpSecModalButton = document.getElementById("card-op-sec-modal-button");
       const cardOpSecModalStatus = document.getElementById("card-op-sec-modal-status");
 
-      // Issue Fine Extended Modal (Inspector)
       const issueFineExtendedModal = document.getElementById("issue-fine-extended-modal");
       const issueFineModalCardInput = document.getElementById("issue-fine-modal-card");
       const issueFineModalAmountInput = document.getElementById("issue-fine-modal-amount");
@@ -307,51 +385,58 @@
       const issueFineModalDaysInput = document.getElementById("issue-fine-modal-days");
       const issueFineExtendedModalButton = document.getElementById("issue-fine-extended-modal-button");
       const issueFineExtendedModalStatus = document.getElementById("issue-fine-extended-modal-status");
+      
+      const profileViewModal = document.getElementById("profile-view-modal");
+      const profileViewContent = document.getElementById("profile-view-content");
+      const profileViewModalCloseBtn = document.getElementById("profile-view-modal-close-btn");
 
-      // Player Fines Modal
       const playerFinesModal = document.getElementById("player-fines-modal");
       const playerFinesListDiv = document.getElementById("player-fines-list");
       const closeFinesModalBtn = document.getElementById("close-fines-modal-btn");
       const playerFinesModalStatus = document.getElementById("player-fines-modal-status");
 
-      // --- NEW: Call Staff Modal Elements ---
       const callStaffModal = document.getElementById("call-staff-modal");
       const callStaffBankerBtn = document.getElementById("call-staff-banker-btn");
       const callStaffInspectorBtn = document.getElementById("call-staff-inspector-btn");
       const callStaffModalCloseBtn = document.getElementById("call-staff-modal-close-btn");
       const callStaffModalStatus = document.getElementById("call-staff-modal-status");
 
-
-      // --- Action Buttons ---
-      // Player Actions
+      // --- Action Buttons & UI Elements ---
       const cardSendBtn = document.getElementById("card-send-btn");
       const playerFinesBtn = document.getElementById("player-fines-btn");
       const finesNotificationDot = document.getElementById("fines-notification-dot");
-      const callStaffBtn = document.getElementById("call-staff-btn"); // NEW
-
-      // Banker/Admin Actions (on bank-management-page)
+      const callStaffBtn = document.getElementById("call-staff-btn"); 
       const cardDepositBtn = document.getElementById("card-deposit-btn");
       const cardWithdrawBtn = document.getElementById("card-withdraw-btn");
-      const addBankerBtn = document.getElementById("add-banker-btn");
-      const removeBankerBtn = document.getElementById("remove-banker-btn");
-      const addInspectorBtn = document.getElementById("add-inspector-btn");
-      const removeInspectorBtn = document.getElementById("remove-inspector-btn");
       const checkBalanceBtn = document.getElementById("check-balance-btn");
-
-      // Inspector Actions (on inspector-page)
       const issueFineBtn = document.getElementById("issue-fine-btn");
       const inspectorOverdueFinesListDiv = document.getElementById("inspector-overdue-fines-list");
-
-
-      // Card information elements
       const cardBalanceSpan = document.getElementById("card-balance");
       const cardNumberSpan = document.getElementById("card-number");
       const cardHolderSpan = document.getElementById("card-holder");
-
       const cardSection = document.getElementById('card');
       const editCardButton = document.getElementById('card-edit-btn');
       const colorPickerModal = document.getElementById('colorPickerModal');
       const colorOptions = document.querySelectorAll('.color-option');
+      
+      // --- Admin Panel Elements ---
+      const adminUserSearchInput = document.getElementById('admin-user-search');
+      const adminUserListDiv = document.getElementById('admin-user-list');
+      const adminLogListDiv = document.getElementById('admin-log-list');
+      const addBankerBtn = document.getElementById("add-banker-btn");
+      const removeBankerBtn = document.getElementById("remove-banker-btn");
+      const addInspectorBtn = document.getElementById("add-inspector-btn");
+      const removeInspectorBtn = document.getElementById("remove-inspector-btn");
+      const transactionsChartCanvas = document.getElementById('transactions-chart');
+      let transactionsChart = null;
+
+      // --- НОВЫЕ ЭЛЕМЕНТЫ ДЛЯ ПЕРЕВОДА ПО НИКУ ---
+      const transferModeSelector = document.getElementById("transfer-mode-selector");
+      const nicknameSuggestionsDiv = document.getElementById("nickname-suggestions");
+      const transferModeRadios = document.querySelectorAll('input[name="transferMode"]');
+      let searchTimeout;
+      let selectedUserForTransfer = null; // Для хранения {nickname, cardNumber}
+
 
       let menuOpened = false;
       let currentUser = null;
@@ -450,10 +535,10 @@
         currentUser = null;
         updateUIForUser();
         updateUIForRole();
-        showPage(welcomeDiv); // Show welcome page after logout
-        document.body.classList.remove("body-gray"); // Ensure background is correct
+        showPage(welcomeDiv); 
+        document.body.classList.remove("body-gray"); 
         closeMenu();
-        showAuthModal(); // Re-open auth modal
+        showAuthModal(); 
       });
 
       function updateUIForUser() {
@@ -461,6 +546,11 @@
           cardBalanceSpan.textContent = `${currentUser.balance} аб`;
           cardNumberSpan.textContent = currentUser.cardNumber || "N/A";
           cardHolderSpan.textContent = currentUser.nickname || "N/A";
+          if (currentUser.isFrozen) {
+              cardSection.classList.add('frozen');
+          } else {
+              cardSection.classList.remove('frozen');
+          }
           if (currentUser.unpaidFinesCount > 0) {
             finesNotificationDot.style.display = "inline-block";
             finesNotificationDot.textContent = currentUser.unpaidFinesCount;
@@ -471,13 +561,13 @@
           cardBalanceSpan.textContent = "0 аб";
           cardNumberSpan.textContent = "N/A";
           cardHolderSpan.textContent = "N/A";
+          cardSection.classList.remove('frozen');
           finesNotificationDot.style.display = "none";
         }
         let gradient = getGradientFromLocalStorage();
         if (gradient) {
            setCardGradient(gradient.startColor, gradient.endColor);
         } else {
-           // Default card gradient from the prompt
            setCardGradient("#8A2BE2", "#4F46E5");
         }
       }
@@ -485,12 +575,8 @@
       function updateUIForRole() {
           bankManagmentBtn.style.display = "none";
           inspectorPanelBtn.style.display = "none";
+          adminPanelBtn.style.display = "none";
           transactionsBtn.style.display = "none";
-
-          addBankerBtn.style.display = "none";
-          removeBankerBtn.style.display = "none";
-          addInspectorBtn.style.display = "none";
-          removeInspectorBtn.style.display = "none";
 
           if (!currentUser) return;
 
@@ -505,12 +591,8 @@
           if (isInspector || isAdmin) {
               inspectorPanelBtn.style.display = "flex";
           }
-
           if (isAdmin) {
-              addBankerBtn.style.display = "flex";
-              removeBankerBtn.style.display = "flex";
-              addInspectorBtn.style.display = "flex";
-              removeInspectorBtn.style.display = "flex";
+              adminPanelBtn.style.display = "flex";
           }
       }
 
@@ -522,113 +604,67 @@
                 parent.innerHTML = '<div class="error">Ошибка загрузки транзакций</div>';
                 return;
             }
-            const data = await res.json(); // Declared data as const
-            if (data === undefined) { // Use const data
+            const data = await res.json(); 
+            if (data === undefined) { 
                 parent.innerHTML = '<div class="error">Нет данных о транзакциях</div>';
                 return;
             }
-            if (data.length === 0) { // Use const data
+            if (data.length === 0) {
                 parent.innerHTML = '<div class="info">Транзакций нет</div>';
                 return;
             }
-            parent.innerHTML += `<div class="transaction-item">
-                    ${ personal ? "" : "<span>ID</span>" }
-                    <span>Тип операции</span>
-                    <span>Количество</span>
-                    <span>Дата и время</span>
-                    <span>Отправитель</span>
-                    <div></div>
-                    <span>Получатель</span>
-                    <span class="transaction-reason-cell">Причина</span>
-                </div>`;
+            if (!personal) {
+              parent.innerHTML += `<div class="transaction-item">
+                      <span>ID</span>
+                      <span>Тип операции</span>
+                      <span>Количество</span>
+                      <span>Дата и время</span>
+                      <span>Отправитель</span>
+                      <div></div>
+                      <span>Получатель</span>
+                      <span class="transaction-reason-cell">Причина</span>
+                  </div>`;
+            }
 
             data.forEach(tx => {
                 const bankSvg = `<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M7.292 1.712c.418-.32.999-.32 1.417 0l4.962 3.793c.632.483.293 1.491-.501 1.495H2.83c-.793-.004-1.133-1.012-.5-1.495zM8 5.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5M3.5 8v3H5V8zM6 8v3h1.5V8zm2.5 0v3H10V8zM11 8v3h1.5V8zm-9 5.25c0-.69.56-1.25 1.25-1.25h9.5c.69 0 1.25.56 1.25 1.25v.25a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5z"/></svg></div>`;
-                const arrowSvg = `<div class="transaction-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.16L18.24 6.4v4.24H0v3.04h18.24v4.24z"/></svg></div>`; // Added class
+                const arrowSvg = `<div class="transaction-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.16L18.24 6.4v4.24H0v3.04h18.24v4.24z"/></svg></div>`;
 
-                // Defensive check for sender/receiver existence before accessing properties
-                const senderNickname = tx.sender?.nickname;
-                const receiverNickname = tx.receiver?.nickname;
+                let displaySenderNickname = tx.sender?.nickname;
+                let displayReceiverNickname = tx.receiver?.nickname;
 
-                // Using temporary variables to check and update nickname if it's the current user
-                let displaySenderNickname = senderNickname;
-                let displayReceiverNickname = receiverNickname;
+                if(currentUser && tx.sender?.nickname === currentUser.nickname) displaySenderNickname = "Вы";
+                if(currentUser && tx.receiver?.nickname === currentUser.nickname) displayReceiverNickname = "Вы";
 
-                if(currentUser && senderNickname === currentUser.nickname) {
-                    displaySenderNickname = "Вы";
-                }
-                if(currentUser && receiverNickname === currentUser.nickname) {
-                    displayReceiverNickname = "Вы";
-                }
+                const senderString = tx.sender ? `<div><span class="transaction-sender">${displaySenderNickname}</span><span class="transaction-card-number">${tx.sender.cardNumber}</span></div>` : bankSvg;
+                const receiverString = tx.receiver ? `<div><span class="transaction-receiver">${displayReceiverNickname}</span><span class="transaction-card-number">${tx.receiver.cardNumber}</span></div>` : bankSvg;
 
-
-                const sender = tx.sender || null;
-                const senderString = sender !== null ? `<div>
-                        <span class="transaction-sender">${displaySenderNickname}</span>
-                        <span class="transaction-card-number">${sender.cardNumber}</span>
-                    </div>` : bankSvg;
-
-                const receiver = tx.receiver || null;
-                const receiverString = receiver !== null ? `<div>
-                        <span class="transaction-receiver">${displayReceiverNickname}</span>
-                        <span class="transaction-card-number">${receiver.cardNumber}</span>
-                    </div>` : bankSvg;
-
-
-                const idString = personal ? "" : `<span>${tx.id}</span>`
-                let color = "white"; // Default color
-                let amount = tx.amount;
-                let operationText = getLocaleTransactionType(tx.type);
-
-
-                // Determine color and amount sign based on type and sender/receiver
-                if (tx.type === "TRANSFER") {
-                    if (currentUser && tx.sender?.nickname === currentUser.nickname) {
-                        amount = "-" + amount;
-                        color = "#F44336"; // Red for outgoing
-                    } else if (currentUser && tx.receiver?.nickname === currentUser.nickname) {
-                         amount = "+" + amount;
-                         color = "#4CAF50"; // Green for incoming
-                    } else {
-                         // For admin/banker viewing all transactions, use default white or specific colors
-                         color = "white"; // Or a neutral color
-                    }
-                } else if (tx.type === "DEPOSIT") {
-                    amount = "+" + amount;
-                    color = "#4CAF50"; // Green for deposit
-                } else if (tx.type === "WITHDRAWAL") {
-                    amount = "-" + amount;
-                    color = "#F44336"; // Red for withdrawal
-                } else if (tx.type === "FINE" || tx.type === "FINE_PAYMENT") {
-                     // Fines are generally negative for the player, positive for the inspector bank account
-                    if (currentUser && tx.user?.nickname === currentUser.nickname) { // If it's the fined player
-                         amount = "-" + amount;
-                         color = "#F44336"; // Red for fine
-                         operationText = "Штраф"; // Or "Оплата штрафа" if needed
-                    } else {
-                        // For inspector/admin viewing, might show as incoming to the system/inspector's account
-                         // Depending on how fines are recorded (to whom they are "sent"), this might need adjustment.
-                         // For simplicity, let's show fines as negative amount transactions originating from user to bank/inspector
-                         amount = "-" + amount; // Assume it's a debit from the user's perspective
-                         color = "#F44336";
-                         operationText = "Штраф";
+                const idString = personal ? "" : `<span>${tx.id}</span>`;
+                let color = "white";
+                let amountText = `${tx.amount} аб`;
+                
+                if (personal) {
+                    if (tx.senderCardNumber === currentUser.cardNumber) {
+                        amountText = `- ${tx.amount} аб`;
+                        color = "var(--danger-color)";
+                    } else if (tx.receiverCardNumber === currentUser.cardNumber) {
+                        amountText = `+ ${tx.amount} аб`;
+                        color = "var(--success-color)";
                     }
                 }
+                const reasonString = tx.reason ? tx.reason : '-';
 
-
-                const reasonString = (tx.type === 'TRANSFER' || tx.type === 'FINE' || tx.type === 'FINE_PAYMENT') && tx.reason ? tx.reason : '-';
-
-                const item = `<div class="transaction-item">
+                const itemHTML = `<div class="transaction-item">
                     ${idString}
-                    <span class="transaction-type">${operationText}</span>
-                    <span class="transaction-amount" style="color: ${color};">${amount} аб</span>
+                    <span class="transaction-type">${getLocaleTransactionType(tx.type)}</span>
+                    <span class="transaction-amount" style="color: ${color};">${amountText}</span>
                     <span class="transaction-date">${formatDateTimeWithoutSeconds(tx.createdAt)}</span>
                     ${senderString}
                     ${arrowSvg}
                     ${receiverString}
                     <span class="transaction-reason-cell">${reasonString}</span>
                 </div>`;
-                parent.innerHTML += item;
+                parent.insertAdjacentHTML('beforeend', itemHTML);
             });
         } catch (e) {
             parent.innerHTML = '<div class="error">Ошибка загрузки</div>';
@@ -653,31 +689,25 @@
         menuOpened = false;
       }
 
-      // Function to show a specific page and hide others with transitions
       function showPage(pageElement) {
           allPages.forEach(page => {
               if (page === pageElement) {
-                  // Ensure display is correct before adding visible class for transition
                   page.style.display = page.id === 'welcome-div' ? 'flex' : 'flex';
-                  setTimeout(() => { // Allow display change to register before starting transition
-                     page.classList.add('visible');
-                  }, 10); // Small delay
+                  setTimeout(() => page.classList.add('visible'), 10);
               } else {
                   page.classList.remove('visible');
-                   // Hide after transition completes
-                  page.addEventListener('transitionend', function handler() {
+                  const handleTransitionEnd = () => {
                        if (!page.classList.contains('visible')) {
                             page.style.display = 'none';
-                             page.removeEventListener('transitionend', handler);
+                            page.removeEventListener('transitionend', handleTransitionEnd);
                        }
-                  });
-                  // If transition doesn't trigger (e.g., element was already hidden), hide immediately
+                  };
+                  page.addEventListener('transitionend', handleTransitionEnd);
                   if (getComputedStyle(page).opacity === '0') {
                        page.style.display = 'none';
                   }
               }
           });
-           // Special case for welcome div background
            if (pageElement === welcomeDiv) {
                document.body.classList.remove("body-gray");
            } else {
@@ -686,26 +716,37 @@
       }
 
 
-      // --- Generic Modal Handlers (Two Inputs) ---
+      // --- Generic Modal Handlers ---
       function showTwoInputsModal(title, ph1, ph2, btnText, callback, options = {}) {
         cardOpModalTitle.textContent = title;
         cardOpModalInput1.placeholder = ph1;
         cardOpModalInput1.type = options.input1Type || 'number';
+        // Управляем видимостью переключателя
+        if (options.isTransfer) {
+            transferModeSelector.style.display = 'flex';
+            // Сбрасываем в состояние "по карте"
+            document.querySelector('input[name="transferMode"][value="card"]').checked = true;
+            cardOpModalInput1.type = 'number';
+            cardOpModalInput1.placeholder = 'Номер карты получателя';
+        } else {
+            transferModeSelector.style.display = 'none';
+        }
+
         cardOpModalInput2.placeholder = ph2;
         cardOpModalInput2.type = options.input2Type || 'number';
-
         cardOpModalInput3.style.display = options.showReason ? 'block' : 'none';
-
         cardOpModalButton.textContent = btnText;
         cardOpModal.style.display = "flex";
         overlay.classList.add("show");
         cardOpModalButton.onclick = () => callback(cardOpModalInput1.value, cardOpModalInput2.value, cardOpModalInput3.value);
       }
-
       function closeTwoInputsModal() {
         cardOpModal.style.display = "none";
         cardOpModalInput1.value = ""; cardOpModalInput2.value = ""; cardOpModalInput3.value = "";
         cardOpModalStatus.textContent = ""; cardOpModalStatus.style.display = "none";
+        nicknameSuggestionsDiv.style.display = 'none'; // Прячем подсказки при закрытии
+        nicknameSuggestionsDiv.innerHTML = '';
+        selectedUserForTransfer = null; // Сбрасываем выбранного пользователя
         overlay.classList.remove("show");
       }
       function showTwoInputModalStatus(message, isError = false) {
@@ -715,7 +756,6 @@
       }
       cardOpModal.addEventListener("click", (e) => { if (e.target === cardOpModal) closeTwoInputsModal(); });
 
-      // --- Generic Modal Handlers (One Input) ---
       function showSingleInputModal(title, ph, btnText, callback, inputType = 'number') {
         cardOpSecModalTitle.textContent = title;
         cardOpSecModalInput.placeholder = ph;
@@ -739,38 +779,56 @@
       cardOpSecModal.addEventListener("click", (e) => { if (e.target === cardOpSecModal) closeSingleInputModal(); });
 
       // --- Player Action Button Handlers ---
-      cardSendBtn.addEventListener("click", () => {
-        if (!currentUser) { alert("Сначала войдите в систему."); return; }
-        showTwoInputsModal("Перевод по карте", "Номер карты получателя", "Сумма перевода", "Отправить",
-          async (receiverCardNumber, amountStr, reason) => {
-            const amount = parseInt(amountStr, 10);
-            if (!receiverCardNumber || !amount || amount <= 0) {
-                showTwoInputModalStatus('Введите корректные данные.', true); return;
+     cardSendBtn.addEventListener("click", () => {
+    if (!currentUser) return;
+    showTwoInputsModal("Перевод", "Номер карты получателя", "Сумма перевода", "Отправить",
+      async (receiverInput, amountStr, reason) => {
+        const amount = parseInt(amountStr, 10);
+        const mode = document.querySelector('input[name="transferMode"]:checked').value;
+        let receiverCardNumber;
+
+        // Если пользователь выбрал кого-то из подсказок, используем эти данные
+        if (selectedUserForTransfer) {
+            // Проверяем, что инпут не был изменен после выбора
+            const currentInput = cardOpModalInput1.value;
+            if ((mode === 'card' && String(selectedUserForTransfer.cardNumber) === currentInput) || 
+                (mode === 'nickname' && selectedUserForTransfer.nickname === currentInput)) 
+            {
+                receiverCardNumber = selectedUserForTransfer.cardNumber;
             }
-            showTwoInputModalStatus('Обработка...');
-            const data = await apiCall('/api/player/transfer', 'POST', {
-                senderCardNumber: currentUser.cardNumber, receiverCardNumber, amount, reason
-            });
-            if (data && data.senderBalance !== undefined) { // Check for successful response structure
-                showTwoInputModalStatus(data.message, false); // Success
-                currentUser.balance = data.senderBalance;
-                updateUIForUser();
-                await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true); // Reload transactions
-                setTimeout(closeTwoInputsModal, 2000);
+        }
+        
+        // Если из подсказок ничего не выбрано (или инпут изменили), берем значение "как есть"
+        if (!receiverCardNumber) {
+            if (mode === 'card') {
+                receiverCardNumber = receiverInput;
             } else {
-                if (data && data.message) {
-                    showTwoInputModalStatus(data.message, true);
-                } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
-                    showTwoInputModalStatus("Ошибка перевода.", true);
-                }
+                // В режиме ника выбор из списка обязателен
+                showTwoInputModalStatus('Для перевода по нику, пожалуйста, выберите пользователя из списка.', true);
+                return;
             }
-          },
-          { showReason: true }
-        );
-      });
+        }
+        
+        if (!receiverCardNumber || !amount || amount <= 0) { 
+            showTwoInputModalStatus('Введите корректные данные для перевода.', true); 
+            return; 
+        }
+        
+        showTwoInputModalStatus('Обработка...');
+        const data = await apiCall('/api/player/transfer', 'POST', { senderCardNumber: currentUser.cardNumber, receiverCardNumber, amount, reason });
+        if (data && data.senderBalance !== undefined) {
+            showTwoInputModalStatus(data.message, false);
+            currentUser.balance = data.senderBalance;
+            updateUIForUser();
+            await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
+            setTimeout(closeTwoInputsModal, 2000);
+        }
+      }, { showReason: true, isTransfer: true }
+    );
+});
 
       playerFinesBtn.addEventListener("click", () => {
-        if (!currentUser) { alert("Сначала войдите в систему."); return; }
+        if (!currentUser) return;
         openPlayerFinesModal();
       });
 
@@ -781,58 +839,40 @@
         overlay.classList.add("show");
 
         const fines = await apiCall('/api/player/my-fines', 'GET');
-        if (!fines) {
-            playerFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>';
-            return;
-        }
-        if (fines.length === 0) {
-            playerFinesListDiv.innerHTML = '<div class="info">У вас нет неоплаченных штрафов.</div>';
-            return;
-        }
+        if (!fines) { playerFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>'; return; }
+        if (fines.length === 0) { playerFinesListDiv.innerHTML = '<div class="info">У вас нет неоплаченных штрафов.</div>'; return; }
+        
         playerFinesListDiv.innerHTML = '';
         fines.forEach(fine => {
             const fineItem = document.createElement('div');
             fineItem.className = 'fine-item';
-            fineItem.innerHTML = `
-                <div class="fine-details">
+            fineItem.innerHTML = `<div class="fine-details">
                     <span class="fine-amount">${fine.amount} аб</span>
                     <span>Причина: ${fine.reason || 'Не указана'}</span>
                     <span>Выписал: ${fine.inspector.nickname} (${fine.inspector.cardNumber})</span>
                     <span class="fine-duedate">Оплатить до: ${formatDateTimeWithoutSeconds(fine.dueDate)}</span>
                 </div>
-                <button class="pay-fine-btn" data-fine-id="${fine.id}">Оплатить</button>
-            `;
-            fineItem.querySelector('.pay-fine-btn').addEventListener('click', async () => {
-                await handlePayFine(fine.id);
-            });
+                <button class="pay-fine-btn" data-fine-id="${fine.id}">Оплатить</button>`;
+            fineItem.querySelector('.pay-fine-btn').addEventListener('click', () => handlePayFine(fine.id));
             playerFinesListDiv.appendChild(fineItem);
         });
       }
 
       async function handlePayFine(fineId) {
         playerFinesModalStatus.textContent = "Оплата...";
-        playerFinesModalStatus.style.display = "block";
         playerFinesModalStatus.style.color = "#4CAF50";
+        playerFinesModalStatus.style.display = "block";
 
         const data = await apiCall(`/api/player/pay-fine/${fineId}`, 'POST');
         if (data && data.newBalance !== undefined) {
             playerFinesModalStatus.textContent = data.message;
-            playerFinesModalStatus.style.color = "#4CAF50";
             currentUser.balance = data.newBalance;
             currentUser.unpaidFinesCount = data.unpaidFinesCount;
             updateUIForUser();
-            await openPlayerFinesModal(); // Refresh list
-             // Also refresh personal transactions as payment is a transaction
-            if (bankPage.classList.contains('visible')) { // Check if bank page is currently visible
+            await openPlayerFinesModal();
+            if (bankPage.classList.contains('visible')) {
                 await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
             }
-        } else {
-            if (data && data.message) {
-                 playerFinesModalStatus.textContent = data.message;
-            } else if (!playerFinesModalStatus.textContent || playerFinesModalStatus.style.display === 'none') {
-                 playerFinesModalStatus.textContent = "Ошибка оплаты штрафа.";
-            }
-            playerFinesModalStatus.style.color = "#FB4848";
         }
       }
       closeFinesModalBtn.addEventListener("click", () => {
@@ -841,215 +881,196 @@
       });
       playerFinesModal.addEventListener("click", (e) => { if (e.target === playerFinesModal) closeFinesModalBtn.click(); });
 
-      // --- NEW: Call Staff Modal Handlers & Button ---
+      // --- Call Staff Modal Handlers ---
       function showCallStaffModal() {
         callStaffModalStatus.textContent = "";
         callStaffModalStatus.style.display = "none";
         callStaffModal.style.display = "flex";
         overlay.classList.add("show");
       }
-
       function closeCallStaffModal() {
         callStaffModal.style.display = "none";
         overlay.classList.remove("show");
       }
-
       function showCallStaffModalStatus(message, isError = false) {
         callStaffModalStatus.textContent = message;
         callStaffModalStatus.style.color = isError ? "#FB4848" : "#4CAF50";
         callStaffModalStatus.style.display = "block";
       }
 
-      callStaffBtn.addEventListener("click", () => {
-        if (!currentUser) { alert("Сначала войдите в систему."); return; }
-        showCallStaffModal();
-      });
-
+      callStaffBtn.addEventListener("click", () => { if (currentUser) showCallStaffModal(); });
       callStaffBankerBtn.addEventListener("click", async () => {
         if (!currentUser) { closeCallStaffModal(); return; }
         showCallStaffModalStatus("Вызываем банкира...");
         const data = await apiCall('/api/call/banker', 'POST');
-        if (data && data.message && data.message.toLowerCase().includes("отправлен")) {
-             setTimeout(() => {
-                 showCallStaffModalStatus(data.message, false);
-                 setTimeout(closeCallStaffModal, 2000); // Close after showing success
-             }, 100);
-
-        } else if (data && data.message) { 
-            showCallStaffModalStatus(data.message, true);
-        } else if (!callStaffModalStatus.textContent || callStaffModalStatus.style.display === 'none') {
-            showCallStaffModalStatus("Ошибка вызова банкира.", true);
+        if (data && !data.error) {
+            showCallStaffModalStatus(data.message, false);
+            setTimeout(closeCallStaffModal, 2000);
         }
       });
-
       callStaffInspectorBtn.addEventListener("click", async () => {
         if (!currentUser) { closeCallStaffModal(); return; }
         showCallStaffModalStatus("Вызываем инспектора...");
         const data = await apiCall('/api/call/inspector', 'POST');
-        if (data && data.message && data.message.toLowerCase().includes("отправлен")) {
-             setTimeout(() => {
-                 showCallStaffModalStatus(data.message, false);
-                 setTimeout(closeCallStaffModal, 2000); // Close after showing success
-             }, 100);
-        } else if (data && data.message) {
-            showCallStaffModalStatus(data.message, true);
-        } else if (!callStaffModalStatus.textContent || callStaffModalStatus.style.display === 'none') {
-            showCallStaffModalStatus("Ошибка вызова инспектора.", true);
+        if (data && !data.error) {
+            showCallStaffModalStatus(data.message, false);
+            setTimeout(closeCallStaffModal, 2000);
         }
       });
-
       callStaffModalCloseBtn.addEventListener("click", closeCallStaffModal);
-      callStaffModal.addEventListener("click", (e) => {
-        if (e.target === callStaffModal) closeCallStaffModal();
-      });
+      callStaffModal.addEventListener("click", (e) => { if (e.target === callStaffModal) closeCallStaffModal(); });
 
 
       // --- Banker/Admin Action Button Handlers ---
       cardDepositBtn.addEventListener("click", () => {
-        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { alert("Нет доступа."); return; }
+        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) return;
         showTwoInputsModal("Пополнение карты", "Номер карты для пополнения", "Сумма", "Пополнить",
           async (targetCardNumber, amountStr) => {
               const amount = parseInt(amountStr, 10);
               if (!targetCardNumber || !amount || amount <= 0) { showTwoInputModalStatus('Неверные данные.', true); return; }
               showTwoInputModalStatus('Обработка...');
               const data = await apiCall('/api/banker/deposit', 'POST', { targetCardNumber, amount });
-              if (data && data.message && !data.message.toLowerCase().includes("ошибка")) {
+              if (data && !data.error) {
                   showTwoInputModalStatus(data.message, false);
-                  if (currentUser && parseInt(targetCardNumber) === currentUser.cardNumber) { 
-                      currentUser.balance = data.newBalance; 
-                      updateUIForUser();
-                  }
-                  if (bankPage.classList.contains('visible')) {
-                     await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
-                  }
-                  if (bankTransactionsPage.classList.contains('visible')) {
-                     await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list", false);
-                  }
-
                   setTimeout(closeTwoInputsModal, 2000);
-              } else {
-                 if (data && data.message) {
-                    showTwoInputModalStatus(data.message, true);
-                 } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
-                    showTwoInputModalStatus("Ошибка пополнения.", true);
-                 }
               }
           }
         );
       });
 
       cardWithdrawBtn.addEventListener("click", () => {
-        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { alert("Нет доступа."); return; }
+        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) return;
         showTwoInputsModal("Списание с карты", "Номер карты для списания", "Сумма", "Списать",
           async (targetCardNumber, amountStr) => {
             const amount = parseInt(amountStr, 10);
             if (!targetCardNumber || !amount || amount <= 0) { showTwoInputModalStatus('Неверные данные.', true); return; }
             showTwoInputModalStatus('Обработка...');
             const data = await apiCall('/api/banker/withdraw', 'POST', { targetCardNumber, amount });
-            if (data && data.message && !data.message.toLowerCase().includes("ошибка")) {
+            if (data && !data.error) {
                 showTwoInputModalStatus(data.message, false);
-                if (currentUser && parseInt(targetCardNumber) === currentUser.cardNumber) {
-                    currentUser.balance = data.newBalance; 
-                    updateUIForUser();
-                }
-                if (bankPage.classList.contains('visible')) {
-                   await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
-                }
-                if (bankTransactionsPage.classList.contains('visible')) {
-                   await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list", false);
-                }
                  setTimeout(closeTwoInputsModal, 2000);
-            } else {
-                if (data && data.message) {
-                    showTwoInputModalStatus(data.message, true);
-                } else if (!cardOpModalStatus.textContent || cardOpModalStatus.style.display === 'none') {
-                    showTwoInputModalStatus("Ошибка списания.", true);
-                }
             }
           }
         );
       });
 
       checkBalanceBtn.addEventListener("click", () => {
-        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { alert("Нет доступа."); return; }
-        showSingleInputModal("Проверка баланса", "Номер карты игрока", "Проверить",
+        if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) return;
+        showSingleInputModal("Проверка профиля", "Номер карты игрока", "Проверить",
           async (targetCardNumber) => {
             if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return;}
-            showSingleInputModalStatus('Проверка...');
-            const data = await apiCall('/api/banker/balance', 'POST', { targetCardNumber });
-            if (data && data.balance !== undefined) { // Success if balance is returned
-                showSingleInputModalStatus(`Баланс ${data.nickname} (${data.cardNumber}): ${data.balance} аб`, false);
-            } else {
-                if (data && data.message) {
-                    showSingleInputModalStatus(data.message, true);
-                } else if (!cardOpSecModalStatus.textContent || cardOpSecModalStatus.style.display === 'none') {
-                     showSingleInputModalStatus("Ошибка получения баланса.", true);
-                }
-            }
+            closeSingleInputModal();
+            showProfileViewModal(targetCardNumber);
           }
         );
       });
+      
+      profileViewModalCloseBtn.addEventListener('click', () => {
+          profileViewModal.style.display = 'none';
+          overlay.classList.remove('show');
+      });
+      profileViewModal.addEventListener('click', (e) => {
+          if (e.target === profileViewModal) profileViewModalCloseBtn.click();
+      });
 
-      // --- Admin Role Management Buttons ---
-      function handleAdminRoleChange(endpoint, targetCardNumber, successMessagePart, roleField, roleValue) {
+      async function showProfileViewModal(cardNumber) {
+          profileViewContent.innerHTML = '<div class="info">Загрузка профиля...</div>';
+          profileViewModal.style.display = 'flex';
+          overlay.classList.add('show');
+          
+          const data = await apiCall('/api/banker/balance', 'POST', { targetCardNumber: cardNumber });
+          
+          if (data && data.user) {
+              const { user, recentTransactions, unpaidFines } = data;
+              let rolesHTML = '';
+              if (user.isAdmin) rolesHTML += '<span class="role-tag admin">Админ</span>';
+              if (user.isBanker) rolesHTML += '<span class="role-tag banker">Банкир</span>';
+              if (user.isInspector) rolesHTML += '<span class="role-tag inspector">Инспектор</span>';
+
+              let transactionsHTML = recentTransactions.length > 0
+                  ? recentTransactions.map(tx => `<div class="transaction-item">
+                        <span>${getLocaleTransactionType(tx.type)}: ${tx.amount} аб</span>
+                        <span style="color: #A0A0B0;">${tx.sender ? tx.sender.nickname : 'Банк'} -> ${tx.receiver ? tx.receiver.nickname : 'Банк'}</span>
+                     </div>`).join('')
+                  : '<div class="info">Нет недавних транзакций</div>';
+
+              let finesHTML = unpaidFines.length > 0
+                  ? unpaidFines.map(fine => `<div class="fine-item">
+                        <span>Штраф: ${fine.amount} аб (до ${formatDateTimeWithoutSeconds(fine.dueDate)})</span>
+                        <span style="color: #A0A0B0;">Выписал: ${fine.inspector.nickname}</span>
+                    </div>`).join('')
+                  : '<div class="info">Нет неоплаченных штрафов</div>';
+
+              profileViewContent.innerHTML = `
+                  <div class="profile-info-card">
+                      <div class="nickname">${user.nickname} ${rolesHTML}</div>
+                      <div class="card-number">Карта: ${user.cardNumber}</div>
+                      <div class="balance">Баланс: ${user.balance} аб</div>
+                      ${user.isFrozen ? '<div class="status">СЧЕТ ЗАМОРОЖЕН</div>' : ''}
+                  </div>
+                  <div class="profile-view-grid">
+                      <div class="profile-section">
+                          <h3>Последние транзакции</h3>
+                          <div class="profile-transaction-list">${transactionsHTML}</div>
+                      </div>
+                      <div class="profile-section">
+                          <h3>Неоплаченные штрафы</h3>
+                          <div class="profile-fines-list">${finesHTML}</div>
+                      </div>
+                  </div>
+              `;
+          } else {
+              profileViewContent.innerHTML = `<div class="error">${data.message || 'Не удалось загрузить профиль.'}</div>`;
+          }
+      }
+
+      // --- Admin Role Management ---
+      function handleAdminRoleChange(endpoint, targetCardNumber, roleField, roleValue) {
         if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return; }
         showSingleInputModalStatus('Обработка...');
         apiCall(endpoint, 'POST', { targetCardNumber }).then(data => {
-            if (data && data.message && data.message.toLowerCase().includes(successMessagePart.toLowerCase())) {
+            if (data && !data.error) {
                 showSingleInputModalStatus(data.message, false);
-                if (currentUser && parseInt(targetCardNumber) === currentUser.cardNumber) {
-                    currentUser[roleField] = roleValue;
-                    updateUIForRole();
-                }
-                 setTimeout(closeSingleInputModal, 2500);
-            } else {
-                 if (data && data.message) {
-                    showSingleInputModalStatus(data.message, true);
-                } else if (!cardOpSecModalStatus.textContent || cardOpSecModalStatus.style.display === 'none') {
-                     showSingleInputModalStatus("Ошибка при изменении роли.", true);
-                }
+                setTimeout(closeSingleInputModal, 2500);
             }
         });
       }
 
       addBankerBtn.addEventListener("click", () => {
-        if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
+        if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Назначить банкира", "Номер карты игрока", "Назначить",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/add-banker', targetCardNumber, "теперь банкир", "isBanker", true)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/add-banker', targetCardNumber, "isBanker", true)
         );
       });
       removeBankerBtn.addEventListener("click", () => {
-        if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
+        if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Снять роль банкира", "Номер карты игрока", "Снять роль",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-banker', targetCardNumber, "роль банкира снята", "isBanker", false)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-banker', targetCardNumber, "isBanker", false)
         );
       });
       addInspectorBtn.addEventListener("click", () => {
-        if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
+        if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Назначить инспектора", "Номер карты игрока", "Назначить",
-           (targetCardNumber) => handleAdminRoleChange('/api/admin/add-inspector', targetCardNumber, "теперь инспектор", "isInspector", true)
+           (targetCardNumber) => handleAdminRoleChange('/api/admin/add-inspector', targetCardNumber, "isInspector", true)
         );
       });
       removeInspectorBtn.addEventListener("click", () => {
-        if (!currentUser || !currentUser.isAdmin) { alert("Нет доступа."); return; }
+        if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Снять роль инспектора", "Номер карты игрока", "Снять роль",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-inspector', targetCardNumber, "роль инспектора снята", "isInspector", false)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-inspector', targetCardNumber, "isInspector", false)
         );
       });
 
-      // --- Inspector Action Button Handlers ---
+      // --- Inspector Actions ---
       issueFineBtn.addEventListener("click", () => {
-        if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin) ) { alert("Нет доступа."); return; }
+        if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin) ) return;
         openIssueFineExtendedModal();
       });
 
       function openIssueFineExtendedModal() {
-        issueFineModalCardInput.value = '';
-        issueFineModalAmountInput.value = '';
-        issueFineModalReasonInput.value = '';
-        issueFineModalDaysInput.value = '';
-        issueFineExtendedModalStatus.textContent = '';
-        issueFineExtendedModalStatus.style.display = "none";
+        issueFineModalCardInput.value = ''; issueFineModalAmountInput.value = '';
+        issueFineModalReasonInput.value = ''; issueFineModalDaysInput.value = '';
+        issueFineExtendedModalStatus.textContent = ''; issueFineExtendedModalStatus.style.display = "none";
         issueFineExtendedModal.style.display = "flex";
         overlay.classList.add("show");
       }
@@ -1071,26 +1092,14 @@
           issueFineExtendedModalStatus.style.display = "block";
 
           const data = await apiCall('/api/inspector/issue-fine', 'POST', { targetCardNumber, amount, reason, daysUntilDue });
-          if (data && data.fine) { // Success if fine object is returned
+          if (data && data.fine) {
               issueFineExtendedModalStatus.textContent = data.message;
-              issueFineExtendedModalStatus.style.color = "#4CAF50";
-              if (inspectorPage.classList.contains('visible')) {
-                 await loadInspectorOverdueFines();
-              }
-              if (bankTransactionsPage.classList.contains('visible')) {
-                 await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list", false);
-              }
-
               setTimeout(() => {
                 issueFineExtendedModal.style.display = "none";
                 overlay.classList.remove("show");
               }, 2500);
           } else {
-              if (data && data.message) {
-                 issueFineExtendedModalStatus.textContent = data.message;
-              } else if (!issueFineExtendedModalStatus.textContent || issueFineExtendedModalStatus.style.display === 'none') {
-                 issueFineExtendedModalStatus.textContent = 'Ошибка при выписке штрафа.';
-              }
+              issueFineExtendedModalStatus.textContent = data.message || 'Ошибка при выписке штрафа.';
               issueFineExtendedModalStatus.style.color = "#FB4848";
           }
       });
@@ -1103,17 +1112,12 @@
 
       async function loadInspectorOverdueFines() {
         if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) return;
-        inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Загрузка просроченных штрафов...</div>';
+        inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Загрузка...</div>';
         const fines = await apiCall('/api/inspector/my-overdue-fines', 'GET');
 
-        if (!fines) { // apiCall would have shown error
-            inspectorOverdueFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>';
-            return;
-        }
-        if (fines.length === 0) {
-            inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Нет просроченных штрафов, выписанных вами.</div>';
-            return;
-        }
+        if (!fines) { inspectorOverdueFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>'; return; }
+        if (fines.length === 0) { inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Нет просроченных штрафов.</div>'; return; }
+        
         inspectorOverdueFinesListDiv.innerHTML = '';
         fines.forEach(fine => {
             const item = `<div class="transaction-item">
@@ -1128,46 +1132,165 @@
       }
 
 
+      // --- Admin Panel Logic ---
+      async function loadAdminPanelData() {
+          loadAdminStats();
+          loadAdminUsers();
+          loadAdminLogs();
+      }
+
+      async function loadAdminStats() {
+          const data = await apiCall('/api/admin/stats', 'GET');
+          if (data && !data.error) {
+              document.getElementById('admin-stats-total-users').textContent = data.totalUsers;
+              document.getElementById('admin-stats-total-money').textContent = `${data.totalMoney} аб`;
+              document.getElementById('admin-stats-transactions').textContent = data.transactionsLast7Days;
+              renderTransactionsChart(data.chartData);
+          }
+      }
+
+      function renderTransactionsChart(chartData) {
+          if (transactionsChart) {
+              transactionsChart.destroy();
+          }
+          transactionsChart = new Chart(transactionsChartCanvas, {
+              type: 'line',
+              data: {
+                  labels: chartData.labels,
+                  datasets: [{
+                      label: 'Транзакции за 7 дней',
+                      data: chartData.data,
+                      fill: true,
+                      backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                      borderColor: 'rgba(139, 92, 246, 1)',
+                      tension: 0.3
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  scales: { y: { beginAtZero: true } }
+              }
+          });
+      }
+      
+      let userSearchTimeout;
+      adminUserSearchInput.addEventListener('input', () => {
+          clearTimeout(userSearchTimeout);
+          userSearchTimeout = setTimeout(() => {
+              loadAdminUsers(adminUserSearchInput.value);
+          }, 300);
+      });
+
+      async function loadAdminUsers(searchQuery = '') {
+          adminUserListDiv.innerHTML = '<div class="info">Загрузка пользователей...</div>';
+          const users = await apiCall(`/api/admin/users?search=${searchQuery}`, 'GET');
+          if (users && Array.isArray(users)) {
+              if (users.length === 0) {
+                  adminUserListDiv.innerHTML = '<div class="info">Пользователи не найдены.</div>';
+                  return;
+              }
+              adminUserListDiv.innerHTML = `
+                <div class="user-item" style="font-weight: bold;">
+                    <span>Пользователь</span>
+                    <span>Баланс</span>
+                    <span>Роли</span>
+                    <span>Действия</span>
+                </div>
+              `;
+              users.forEach(user => {
+                  let rolesHTML = '';
+                  if (user.isAdmin) rolesHTML += '<span class="role-tag admin">Админ</span>';
+                  if (user.isBanker) rolesHTML += '<span class="role-tag banker">Банкир</span>';
+                  if (user.isInspector) rolesHTML += '<span class="role-tag inspector">Инспектор</span>';
+                  if (user.isFrozen) rolesHTML += '<span class="frozen-indicator">Заморожен</span>';
+
+                  const userItem = document.createElement('div');
+                  userItem.className = 'user-item';
+                  userItem.innerHTML = `
+                      <div>
+                          <span class="user-nickname">${user.nickname}</span>
+                          <span class="transaction-card-number">${user.cardNumber}</span>
+                      </div>
+                      <span>${user.balance} аб</span>
+                      <div class="user-roles">${rolesHTML || '<span>-</span>'}</div>
+                      <div class="user-item-actions">
+                          <button class="action-btn" data-card-number="${user.cardNumber}">${user.isFrozen ? 'Разморозить' : 'Заморозить'}</button>
+                      </div>
+                  `;
+                  const freezeButton = userItem.querySelector('.action-btn');
+                  freezeButton.classList.add(user.isFrozen ? 'unfreeze' : 'freeze');
+                  if (user.isAdmin) {
+                      freezeButton.disabled = true;
+                      freezeButton.textContent = "Нельзя";
+                  } else {
+                      freezeButton.addEventListener('click', async (e) => {
+                          const cardNumber = e.target.dataset.cardNumber;
+                          const result = await apiCall('/api/admin/toggle-freeze', 'POST', { targetCardNumber: cardNumber });
+                          if (result && !result.error) {
+                              loadAdminUsers(adminUserSearchInput.value); // Refresh list
+                          }
+                      });
+                  }
+                  adminUserListDiv.appendChild(userItem);
+              });
+          } else {
+              adminUserListDiv.innerHTML = '<div class="error">Ошибка загрузки пользователей.</div>';
+          }
+      }
+
+      async function loadAdminLogs() {
+          adminLogListDiv.innerHTML = '<div class="info">Загрузка логов...</div>';
+          const logs = await apiCall('/api/admin/logs', 'GET');
+          if (logs && Array.isArray(logs)) {
+               if (logs.length === 0) {
+                  adminLogListDiv.innerHTML = '<div class="info">Логов нет.</div>';
+                  return;
+              }
+              adminLogListDiv.innerHTML = `
+                <div class="log-item" style="font-weight: bold;">
+                    <span>Дата</span>
+                    <span>Администратор</span>
+                    <span>Действие</span>
+                    <span>Цель / Детали</span>
+                </div>
+              `;
+              logs.forEach(log => {
+                  const logItem = `<div class="log-item">
+                      <span class="transaction-date">${formatDateTimeWithoutSeconds(log.createdAt)}</span>
+                      <span>${log.admin.nickname}</span>
+                      <span>${log.action}</span>
+                      <span>${log.targetUserNickname || ''} ${log.details ? `(${log.details})` : ''}</span>
+                  </div>`;
+                  adminLogListDiv.innerHTML += logItem;
+              });
+          } else {
+              adminLogListDiv.innerHTML = '<div class="error">Ошибка загрузки логов.</div>';
+          }
+      }
+
+
       // --- Menu Navigation & Page Toggling ---
       hamburgerBtn.addEventListener("click", toggleMenu);
       overlay.addEventListener("click", () => {
-        closeMenu();
-        closeTwoInputsModal();
-        closeSingleInputModal();
+        closeMenu(); closeTwoInputsModal(); closeSingleInputModal();
         if(playerFinesModal.style.display === 'flex') closeFinesModalBtn.click();
-        if(issueFineExtendedModal.style.display === 'flex') {
-            issueFineExtendedModal.style.display = "none";
-        }
-        if(callStaffModal.style.display === 'flex') closeCallStaffModal(); // NEW
+        if(issueFineExtendedModal.style.display === 'flex') issueFineExtendedModal.style.display = "none";
+        if(callStaffModal.style.display === 'flex') closeCallStaffModal();
+        if(profileViewModal.style.display === 'flex') profileViewModalCloseBtn.click();
         colorPickerModal.classList.remove('visible');
-        if (authModal.style.display !== 'flex' &&
-            cardOpModal.style.display !== 'flex' &&
-            cardOpSecModal.style.display !== 'flex' &&
-            playerFinesModal.style.display !== 'flex' &&
-            issueFineExtendedModal.style.display !== 'flex' &&
-            callStaffModal.style.display !== 'flex' &&
-            !sideMenu.classList.contains('open')) {
+        if (authModal.style.display !== 'flex' && !overlay.querySelector('.modal[style*="display: flex"]') && !sideMenu.classList.contains('open')) {
            overlay.classList.remove("show");
         }
       });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            closeMenu();
-            closeTwoInputsModal();
-            closeSingleInputModal();
+            closeMenu(); closeTwoInputsModal(); closeSingleInputModal();
             if(playerFinesModal.style.display === 'flex') closeFinesModalBtn.click();
-            if(issueFineExtendedModal.style.display === 'flex') {
-                issueFineExtendedModal.style.display = "none";
-            }
-            if(callStaffModal.style.display === 'flex') closeCallStaffModal(); // NEW
+            if(issueFineExtendedModal.style.display === 'flex') issueFineExtendedModal.style.display = "none";
+            if(callStaffModal.style.display === 'flex') closeCallStaffModal();
+            if(profileViewModal.style.display === 'flex') profileViewModalCloseBtn.click();
             colorPickerModal.classList.remove('visible');
-             if (authModal.style.display !== 'flex' &&
-                cardOpModal.style.display !== 'flex' &&
-                cardOpSecModal.style.display !== 'flex' &&
-                playerFinesModal.style.display !== 'flex' &&
-                issueFineExtendedModal.style.display !== 'flex' &&
-                callStaffModal.style.display !== 'flex' &&
-                !sideMenu.classList.contains('open')) {
+             if (authModal.style.display !== 'flex' && !overlay.querySelector('.modal[style*="display: flex"]') && !sideMenu.classList.contains('open')) {
                overlay.classList.remove("show");
             }
         }
@@ -1179,66 +1302,146 @@
         await loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
         closeMenu();
       });
-
       bankManagmentBtn.addEventListener("click", () => {
         if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { showAuthModal(); return; }
         showPage(bankManagementPage);
         closeMenu();
       });
-
       inspectorPanelBtn.addEventListener("click", async () => {
         if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) { showAuthModal(); return; }
         showPage(inspectorPage);
         await loadInspectorOverdueFines();
         closeMenu();
       });
-
+      adminPanelBtn.addEventListener("click", async () => {
+        if (!currentUser || !currentUser.isAdmin) { showAuthModal(); return; }
+        showPage(adminPage);
+        await loadAdminPanelData();
+        closeMenu();
+      });
       transactionsBtn.addEventListener("click", async () => {
         if (!currentUser || (!currentUser.isBanker && !currentUser.isAdmin)) { showAuthModal(); return; }
         showPage(bankTransactionsPage);
         await loadTransactions(document.getElementById("transaction-list"), "/api/transaction-list", false);
         closeMenu();
       });
-
       logo.addEventListener("click", () => {
         showPage(welcomeDiv);
         closeMenu();
       });
 
+      // --- НОВАЯ ЛОГИКА ДЛЯ ПЕРЕКЛЮЧЕНИЯ РЕЖИМА И ПОИСКА ---
+
+      transferModeRadios.forEach(radio => {
+          radio.addEventListener('change', (e) => {
+              const mode = e.target.value;
+              cardOpModalInput1.value = ''; // Очищаем инпут при смене режима
+              selectedUserForTransfer = null;
+              nicknameSuggestionsDiv.style.display = 'none';
+              nicknameSuggestionsDiv.innerHTML = '';
+              if (mode === 'card') {
+                  cardOpModalInput1.type = 'number';
+                  cardOpModalInput1.placeholder = 'Номер карты получателя';
+              } else {
+                  cardOpModalInput1.type = 'text';
+                  cardOpModalInput1.placeholder = 'Никнейм получателя';
+              }
+          });
+      });
+
+      cardOpModalInput1.addEventListener('input', () => {
+    const mode = document.querySelector('input[name="transferMode"]:checked').value;
+    const query = cardOpModalInput1.value.trim();
+    selectedUserForTransfer = null; // Сбрасываем выбор, если пользователь меняет текст
+
+    if (query.length < 2) {
+        nicknameSuggestionsDiv.style.display = 'none';
+        return;
+    }
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        let endpoint = '/api/users/search?';
+        if (mode === 'nickname') {
+            endpoint += `nickname=${query}`;
+        } else { // mode === 'card'
+            endpoint += `cardNumber=${query}`;
+        }
+
+        const users = await apiCall(endpoint, 'GET');
+        if (users && Array.isArray(users)) {
+            displaySuggestions(users, mode); // Передаем режим для правильного отображения
+        }
+    }, 300); // Debounce
+});
+      
+      function displaySuggestions(users, mode) {
+    nicknameSuggestionsDiv.innerHTML = '';
+    if (users.length === 0) {
+        nicknameSuggestionsDiv.style.display = 'none';
+        return;
+    }
+
+    users.forEach(user => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'suggestion-item';
+        
+        // Отображаем в зависимости от режима: "Ник (Карта)" или "Карта (Ник)"
+        if (mode === 'nickname') {
+            suggestionItem.textContent = `${user.nickname} (${user.cardNumber})`;
+        } else { 
+            suggestionItem.textContent = `${user.cardNumber} (${user.nickname})`;
+        }
+        
+        suggestionItem.addEventListener('click', () => {
+            // Заполняем инпут в зависимости от режима
+            if (mode === 'nickname') {
+                cardOpModalInput1.value = user.nickname;
+            } else {
+                cardOpModalInput1.value = user.cardNumber;
+            }
+            selectedUserForTransfer = { nickname: user.nickname, cardNumber: user.cardNumber };
+            nicknameSuggestionsDiv.style.display = 'none';
+        });
+        nicknameSuggestionsDiv.appendChild(suggestionItem);
+    });
+    nicknameSuggestionsDiv.style.display = 'block';
+}
+
+      // Закрывать подсказки при клике вне
+      document.addEventListener('click', (e) => {
+          if (!nicknameSuggestionsDiv.contains(e.target) && e.target !== cardOpModalInput1) {
+              nicknameSuggestionsDiv.style.display = 'none';
+          }
+      });
+
       // --- API Call Helper ---
       async function apiCall(endpoint, method, body) {
         const currentOpenModalStatus = getCurrentOpenModalStatusElement();
-        if (currentOpenModalStatus) { // Clear previous status message
+        if (currentOpenModalStatus) {
             currentOpenModalStatus.textContent = '';
             currentOpenModalStatus.style.display = 'none';
         }
         try {
             const response = await fetch(endpoint, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: body ? JSON.stringify(body) : null,
-                credentials: 'include' 
+                method: method, headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null, credentials: 'include' 
             });
             const data = await response.json().catch(() => null); 
 
             if (!response.ok) {
                 const errorMsg = data?.message || data?.error || `Ошибка ${response.status}`;
-                console.error('API Error:', response.status, errorMsg, data);
                 if (currentOpenModalStatus) {
                     currentOpenModalStatus.textContent = errorMsg;
                     currentOpenModalStatus.style.color = "#FB4848";
                     currentOpenModalStatus.style.display = "block";
                 }
-                return data || { message: errorMsg, error: true };
-            }
-            if (currentOpenModalStatus && (method === 'POST' || method === 'PUT' || method === 'DELETE') && data && data.message) {
-            } else if (currentOpenModalStatus && method !== 'GET' && (!data || !data.message)) {
-                 currentOpenModalStatus.style.display = 'none';
+                return { ...data, error: true };
             }
             return data;
         } catch (error) {
             console.error('API Call Exception:', error);
-            const errorMsg = 'Сетевая ошибка или ошибка парсинга ответа.';
+            const errorMsg = 'Сетевая ошибка.';
             if (currentOpenModalStatus) {
                 currentOpenModalStatus.textContent = errorMsg;
                 currentOpenModalStatus.style.color = "#FB4848";
@@ -1254,7 +1457,7 @@
         if (cardOpSecModal.style.display === 'flex') return cardOpSecModalStatus;
         if (issueFineExtendedModal.style.display === 'flex') return issueFineExtendedModalStatus;
         if (playerFinesModal.style.display === 'flex') return playerFinesModalStatus;
-        if (callStaffModal.style.display === 'flex') return callStaffModalStatus; // NEW
+        if (callStaffModal.style.display === 'flex') return callStaffModalStatus;
         return null;
       }
 
@@ -1262,63 +1465,31 @@
       function formatDateTimeWithoutSeconds(isoString) {
         if (!isoString) return 'N/A';
         const date = new Date(isoString);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        return `${day}.${month}.${year} ${hours}:${minutes}`;
+        return date.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       }
 
       function getLocaleTransactionType(type) {
-        switch (type) {
-            case "DEPOSIT": return "Пополнение";
-            case "WITHDRAWAL": return "Списание";
-            case "TRANSFER": return "Перевод";
-            case "FINE_PAYMENT": return "Оплата штрафа";
-            case "FINE": return "Штраф";
-            default: return type;
-        }
+        const types = { "DEPOSIT": "Пополнение", "WITHDRAWAL": "Списание", "TRANSFER": "Перевод", "FINE": "Оплата штрафа" };
+        return types[type] || type;
       }
 
       // --- Card Color Picker ---
-      function setCardGradient(startColor, endColor) {
-          cardSection.style.background = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
-      }
-      function saveGradientToLocalStorage(startColor, endColor) {
-        localStorage.setItem('cardGradient', JSON.stringify({ startColor, endColor }));
-      }
+      function setCardGradient(startColor, endColor) { cardSection.style.background = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`; }
+      function saveGradientToLocalStorage(startColor, endColor) { localStorage.setItem('cardGradient', JSON.stringify({ startColor, endColor })); }
       function getGradientFromLocalStorage() {
         const stored = localStorage.getItem('cardGradient');
-        if (stored) {
-          try { return JSON.parse(stored); } catch (e) { console.error('Error parsing gradient', e); }
-        }
-        return null;
+        try { return stored ? JSON.parse(stored) : null; } catch (e) { return null; }
       }
       editCardButton.addEventListener('click', (e) => {
-          e.stopPropagation();
-          colorPickerModal.classList.toggle('visible');
+          e.stopPropagation(); colorPickerModal.classList.toggle('visible');
           const rect = editCardButton.getBoundingClientRect();
-          let top = rect.bottom + 10;
-          let left = rect.left;
-
-          if (top + colorPickerModal.offsetHeight > window.innerHeight) {
-              top = rect.top - colorPickerModal.offsetHeight - 10;
-          }
-          if (left + colorPickerModal.offsetWidth > window.innerWidth) {
-               left = rect.right - colorPickerModal.offsetWidth;
-          }
-
-          colorPickerModal.style.top = `${top}px`;
-          colorPickerModal.style.left = `${left}px`;
-
+          colorPickerModal.style.top = `${rect.bottom + 10}px`;
+          colorPickerModal.style.left = `${rect.left}px`;
       });
       colorOptions.forEach(option => {
           option.addEventListener('click', () => {
-              const startColor = option.getAttribute('data-color');
-              const endColor = option.getAttribute('data-gradient-end');
-              setCardGradient(startColor, endColor);
-              saveGradientToLocalStorage(startColor, endColor);
+              const startColor = option.dataset.color; const endColor = option.dataset.gradientEnd;
+              setCardGradient(startColor, endColor); saveGradientToLocalStorage(startColor, endColor);
               colorPickerModal.classList.remove('visible');
           });
       });
@@ -1328,39 +1499,26 @@
           }
       });
 
-      const starsCanvas = document.getElementById("stars");
-
-      // Initial page load logic
+      // --- Initial page load logic ---
       document.addEventListener('DOMContentLoaded', () => {
-         if (!currentUser && window.location.hash === '') {
-             showPage(welcomeDiv);
-         } else if (currentUser) {
+         if (!currentUser && window.location.hash === '') showPage(welcomeDiv);
+         else if (currentUser) {
              showPage(bankPage);
              loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
-         } else {
-            showPage(welcomeDiv); // Default fallback
-         }
+         } else showPage(welcomeDiv);
       });
 
     </script>
-    <script src="stars.js"></script> <!-- Скрипт для звезд на странице банка -->
-
-    <!-- Vanta.js Скрипты для анимации на главном экране -->
+    <script src="stars.js"></script> 
     <script src="p5.min.js"></script>
     <script src="vanta.topology.min.js"></script>
     <script>
-    // Инициализация Vanta.js на элементе welcome-div
     VANTA.TOPOLOGY({
-      el: "#welcome-div",
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00,
-      color: 0xa357f2,        // Vivid Violet from prompt
-      backgroundColor: 0x121218 // Deep Space from prompt
+      el: "#welcome-div", mouseControls: true, touchControls: true, gyroControls: false,
+      minHeight: 200.00, minWidth: 200.00,
+      scale: 1.00, scaleMobile: 1.00,
+      color: 0xa357f2,
+      backgroundColor: 0x121218
     })
     </script>
   </body>
