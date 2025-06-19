@@ -7,40 +7,47 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL") // Убедитесь, что DATABASE_URL="file:./dev.db" в вашем .env файле
+  url      = "file:./dev.db"
 }
 
 enum OperationBy {
   PLAYER
   BANK
-  INSPECTOR // Инспектор создает сущность Fine, а не Transaction напрямую
-  ADMIN     // Для логирования действий администратора
+  SYSTEM
 }
 
 enum TransactionType {
-  WITHDRAWAL
-  DEPOSIT
   TRANSFER
-  FINE // Для оплаты штрафа игроком
+  DEPOSIT
+  WITHDRAWAL
+  FINE
 }
 
 model User {
-  id                 Int             @id @default(autoincrement())
-  cardNumber         Int             @unique
-  nickname           String          @unique
-  password           String
-  balance            Int             @default(0)
-  isBanker           Boolean         @default(false)
-  isAdmin            Boolean         @default(false)
-  isInspector        Boolean         @default(false)
-  isFrozen           Boolean         @default(false) // <-- НОВОЕ ПОЛЕ: для заморозки счета
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  sentTransactions   Transaction[]   @relation("SenderTransactions")
-  receivedTransactions Transaction[] @relation("ReceiverTransactions")
-  finesIssued        Fine[]          @relation("InspectorFines")
-  finesReceived      Fine[]          @relation("UserFines")
-  adminLogs          AdminLog[]      @relation("AdminActionLogs") // Связь с логами
+  id                   Int            @id @default(autoincrement())
+  cardNumber           Int            @unique
+  nickname             String         @unique
+  password             String?
+  balance              Int            @default(0)
+  isBanker             Boolean        @default(false)
+  isInspector          Boolean        @default(false)
+  isAdmin              Boolean        @default(false)
+  isJudge              Boolean        @default(false)
+  isFrozen             Boolean        @default(false)
+  frozenById           Int?
+  frozenBy             User?          @relation("UserFrozen", fields: [frozenById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frozeOthers          User[]         @relation("UserFrozen")
+  issuedFines          Fine[]         @relation("InspectorFines")
+  fines                Fine[]         @relation("UserFines")
+  createdCases         CourtCase[]    @relation("PlaintiffCases")
+  involvedInCases      CourtCase[]    @relation("DefendantCases")
+  sentMessages         CourtMessage[]
+  judgedCases          CourtCase[]    @relation("JudgeCases")
+  issuedAdminLogs      AdminLog[]
+  sentTransactions     Transaction[]  @relation("SenderTransactions")
+  receivedTransactions Transaction[]  @relation("ReceiverTransactions")
+  registrationToken    String?        @unique
+  tokenExpires         DateTime?
 }
 
 model Transaction {
@@ -48,38 +55,72 @@ model Transaction {
   senderCardNumber   Int?
   receiverCardNumber Int?
   amount             Int
-  reason             String?
-  operationBy        OperationBy
-  type               TransactionType
   createdAt          DateTime        @default(now())
+  type               TransactionType
+  operationBy        OperationBy
+  reason             String?
+  finePaymentForId   Int?            @unique
+  finePayment        Fine?           @relation(fields: [finePaymentForId], references: [id])
   sender             User?           @relation("SenderTransactions", fields: [senderCardNumber], references: [cardNumber])
   receiver           User?           @relation("ReceiverTransactions", fields: [receiverCardNumber], references: [cardNumber])
-  finePaymentForId   Int?            @unique
-  FinePaymentFor     Fine?           @relation(fields: [finePaymentForId], references: [id])
 }
 
 model Fine {
-  id                  Int           @id @default(autoincrement())
+  id                  Int          @id @default(autoincrement())
   userId              Int
-  user                User          @relation("UserFines", fields: [userId], references: [id])
+  user                User         @relation("UserFines", fields: [userId], references: [id])
   issuedByInspectorId Int
-  inspector           User          @relation("InspectorFines", fields: [issuedByInspectorId], references: [id])
+  inspector           User         @relation("InspectorFines", fields: [issuedByInspectorId], references: [id])
   amount              Int
   reason              String?
-  createdAt           DateTime      @default(now())
-  dueDate             DateTime
-  isPaid              Boolean       @default(false)
+  isPaid              Boolean      @default(false)
   paidAt              DateTime?
-  paymentTransaction  Transaction?
+  createdAt           DateTime     @default(now())
+  dueDate             DateTime
+  transaction         Transaction?
 }
 
-// <-- НОВАЯ МОДЕЛЬ: для логирования действий админов -->
 model AdminLog {
-  id              Int      @id @default(autoincrement())
-  adminId         Int
-  admin           User     @relation("AdminActionLogs", fields: [adminId], references: [id])
-  action          String   // e.g., "GAVE_BANKER_ROLE", "FROZE_ACCOUNT", "EDITED_BALANCE"
-  targetUserNickname String?  // Nickname of the user the action was performed on
-  details         String?  // e.g., "Changed balance from 500 to 1000"
-  createdAt       DateTime @default(now())
+  id                 Int      @id @default(autoincrement())
+  adminId            Int
+  admin              User     @relation(fields: [adminId], references: [id])
+  action             String
+  targetUserNickname String?
+  details            String?
+  createdAt          DateTime @default(now())
+}
+
+model CourtCase {
+  id          Int            @id @default(autoincrement())
+  title       String
+  reason      String
+  status      String         @default("NEW") // NEW, IN_PROGRESS, CLOSED
+  plaintiffId Int
+  plaintiff   User           @relation("PlaintiffCases", fields: [plaintiffId], references: [id])
+  defendantId Int
+  defendant   User           @relation("DefendantCases", fields: [defendantId], references: [id])
+  judgeId     Int?
+  judge       User?          @relation("JudgeCases", fields: [judgeId], references: [id])
+  createdAt   DateTime       @default(now())
+  closedAt    DateTime?
+  closeReason String?
+  messages    CourtMessage[]
+}
+
+model CourtMessage {
+  id        Int       @id @default(autoincrement())
+  caseId    Int
+  case      CourtCase @relation(fields: [caseId], references: [id])
+  senderId  Int
+  sender    User      @relation(fields: [senderId], references: [id])
+  text      String
+  createdAt DateTime  @default(now())
+}
+
+model registrationToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  nickname  String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

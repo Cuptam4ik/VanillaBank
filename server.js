@@ -6,6 +6,11 @@ const { Server } = require("socket.io");
 const { PrismaClient, OperationBy, TransactionType } = require('@prisma/client');
 const session = require('express-session');
 const { spawn } = require('child_process');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid'); // Для генерации токенов
+const fs = require('fs'); // Добавляем модуль для работы с файлами
+const { Client, GatewayIntentBits } = require('discord.js');
+const cors = require('cors');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -27,8 +32,33 @@ const callCooldowns = new Map();
 let pythonBotProcess = null;
 const userSockets = new Map();
 
+const bot = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
+});
+
 // --- Express Middleware ---
+app.use(cors());
+
+// Альтернативный способ отдачи страницы регистрации, чтобы обойти кэш
+app.get('/register.html', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'register_utf8.html');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Ошибка при чтении файла register.html:', err);
+            return res.status(500).send('Ошибка при загрузке страницы регистрации.');
+        }
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(data);
+    });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(express.json());
 
 const sessionMiddleware = session({
@@ -76,13 +106,9 @@ function emitToUser(userId, event, data) {
 // --- Utility Functions ---
 async function generateUniqueCardNumber() {
     let cardNumber;
-    let isUnique = false;
-    while (!isUnique) {
-      cardNumber = Math.floor(10000 + Math.random() * 90000);
-      if (cardNumber === TREASURY_CARD_NUMBER) continue;
-      const existingUser = await prisma.user.findUnique({ where: { cardNumber: cardNumber } });
-      if (!existingUser) isUnique = true;
-    }
+    do {
+        cardNumber = Math.floor(10000 + Math.random() * 90000);
+    } while (await findUserByCardNumber(cardNumber));
     return cardNumber;
 }
 
@@ -131,15 +157,16 @@ app.post('/api/login', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { nickname } });
         if (!user) return res.status(404).json({ message: 'Пользователь не найден!' });
-        
-        // Убрано сравнение хеша, теперь простое сравнение строк
-        const passwordMatch = (password === user.password);
+        let passwordMatch = false;
+        if (user.password && user.password.startsWith('$2a$')) {
+            passwordMatch = await bcrypt.compare(password, user.password);
+        } else {
+            passwordMatch = (password === user.password);
+        }
         if (!passwordMatch) return res.status(401).json({ message: 'Введены неверные данные!' });
-
         const unpaidFinesCount = await prisma.fine.count({
             where: { userId: user.id, isPaid: false }
         });
-
         req.session.userId = user.id;
         res.json({ message: 'Login successful', user: { ...user, unpaidFinesCount } });
     } catch (error) {
@@ -156,10 +183,10 @@ app.post('/api/register', async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'Данное имя пользователя уже занято!' });
         }
-        // Убрано хеширование, пароль сохраняется в открытом виде (НЕБЕЗОПАСНО!)
         const newCardNumber = await generateUniqueCardNumber();
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
-            data: { cardNumber: newCardNumber, nickname, password: password }
+            data: { cardNumber: newCardNumber, nickname, password: hashedPassword }
         });
         req.session.userId = user.id;
         res.status(201).json({ message: 'Регистрация завершена успешно!', user: { ...user, unpaidFinesCount: 0 } });
@@ -199,7 +226,7 @@ app.get('/api/users/search', userAuth, async (req, res) => {
             matchingUsers = await prisma.user.findMany({
                 where: whereClause,
                 take: 5,
-                select: { nickname: true, cardNumber: true }
+                select: { id: true, nickname: true, cardNumber: true }
             });
         } else if (cardNumber) {
             // Эффективный поиск по номеру карты с использованием диапазона
@@ -215,7 +242,7 @@ app.get('/api/users/search', userAuth, async (req, res) => {
                 matchingUsers = await prisma.user.findMany({
                     where: whereClause,
                     take: 5,
-                    select: { nickname: true, cardNumber: true }
+                    select: { id: true, nickname: true, cardNumber: true }
                 });
             }
         }
@@ -860,6 +887,146 @@ app.get('/api/transaction-list', userAuth, bankerOrAdminAuth, async (req, res) =
     }
 });
 
+// --- Court System API ---
+// Получить список дел (с фильтрами: статус, поиск, архив)
+app.get('/api/cases', userAuth, async (req, res) => {
+    const { status, search, mine } = req.query;
+    let where = {};
+    if (status) where.status = status;
+    if (search) where.title = { contains: search };
+    if (mine === 'true') where.OR = [
+        { plaintiffId: req.user.id },
+        { defendantId: req.user.id }
+    ];
+    try {
+        const cases = await prisma.courtCase.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                plaintiff: { select: { id: true, nickname: true } },
+                defendant: { select: { id: true, nickname: true } },
+            }
+        });
+        res.json(cases);
+    } catch (e) {
+        console.error('Ошибка получения дел:', e);
+        res.status(500).json({ message: 'Ошибка получения дел' });
+    }
+});
+
+// Создать новое дело
+app.post('/api/cases', userAuth, async (req, res) => {
+    const { title, reason, defendantId } = req.body;
+    if (!title || !defendantId) return res.status(400).json({ message: 'Требуется тема и ответчик' });
+    try {
+        const newCase = await prisma.courtCase.create({
+            data: {
+                title,
+                reason,
+                plaintiffId: req.user.id,
+                defendantId: parseInt(defendantId),
+            },
+            include: {
+                plaintiff: { select: { id: true, nickname: true } },
+                defendant: { select: { id: true, nickname: true } },
+            }
+        });
+        res.status(201).json(newCase);
+    } catch (e) {
+        console.error('Ошибка создания дела:', e);
+        res.status(500).json({ message: 'Ошибка создания дела' });
+    }
+});
+
+// Получить детали дела
+app.get('/api/cases/:id', userAuth, async (req, res) => {
+    try {
+        const courtCase = await prisma.courtCase.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: {
+                plaintiff: { select: { id: true, nickname: true } },
+                defendant: { select: { id: true, nickname: true } },
+            }
+        });
+        if (!courtCase) return res.status(404).json({ message: 'Дело не найдено' });
+        res.json(courtCase);
+    } catch (e) {
+        console.error('Ошибка получения дела:', e);
+        res.status(500).json({ message: 'Ошибка получения дела' });
+    }
+});
+
+// Получить сообщения по делу
+app.get('/api/cases/:id/messages', userAuth, async (req, res) => {
+    try {
+        const messages = await prisma.courtMessage.findMany({
+            where: { caseId: parseInt(req.params.id) },
+            orderBy: { createdAt: 'asc' },
+            include: { sender: { select: { id: true, nickname: true } } }
+        });
+        res.json(messages);
+    } catch (e) {
+        console.error('Ошибка получения сообщений дела:', e);
+        res.status(500).json({ message: 'Ошибка получения сообщений' });
+    }
+});
+
+// Отправить сообщение в чат дела (только текст)
+app.post('/api/cases/:id/messages', userAuth, async (req, res) => {
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ message: 'Пустое сообщение' });
+    try {
+        const newMsg = await prisma.courtMessage.create({
+            data: {
+                caseId: parseInt(req.params.id),
+                senderId: req.user.id,
+                text: text.trim(),
+            },
+            include: { sender: { select: { id: true, nickname: true } } }
+        });
+        res.status(201).json(newMsg);
+    } catch (e) {
+        console.error('Ошибка отправки сообщения:', e);
+        res.status(500).json({ message: 'Ошибка отправки сообщения' });
+    }
+});
+
+// --- Court System: Судья ---
+// Судья берёт дело в работу
+app.post('/api/cases/:id/take', userAuth, async (req, res) => {
+  if (!req.user.isJudge) return res.status(403).json({ message: 'Нет прав судьи' });
+  try {
+    const courtCase = await prisma.courtCase.findUnique({ where: { id: parseInt(req.params.id) } });
+    if (!courtCase) return res.status(404).json({ message: 'Дело не найдено' });
+    if (courtCase.status !== 'NEW') return res.status(400).json({ message: 'Дело уже в работе или закрыто' });
+    const updated = await prisma.courtCase.update({
+      where: { id: courtCase.id },
+      data: { status: 'IN_PROGRESS', judgeId: req.user.id }
+    });
+    res.json(updated);
+  } catch (e) {
+    res.status(500).json({ message: 'Ошибка взятия дела в работу' });
+  }
+});
+// Судья закрывает дело
+app.post('/api/cases/:id/close', userAuth, async (req, res) => {
+  if (!req.user.isJudge) return res.status(403).json({ message: 'Нет прав судьи' });
+  const { closeReason } = req.body;
+  if (!closeReason || closeReason.length < 3) return res.status(400).json({ message: 'Укажите причину закрытия' });
+  try {
+    const courtCase = await prisma.courtCase.findUnique({ where: { id: parseInt(req.params.id) } });
+    if (!courtCase) return res.status(404).json({ message: 'Дело не найдено' });
+    if (courtCase.status !== 'IN_PROGRESS' || courtCase.judgeId !== req.user.id) return res.status(400).json({ message: 'Дело не в работе у вас' });
+    const updated = await prisma.courtCase.update({
+      where: { id: courtCase.id },
+      data: { status: 'CLOSED', closeReason, closedAt: new Date() }
+    });
+    res.json(updated);
+  } catch (e) {
+    res.status(500).json({ message: 'Ошибка закрытия дела' });
+  }
+});
+
 // --- Catch-all route for SPA ---
 // This must be AFTER all API routes. It sends the main HTML file for any non-API GET request.
 app.get('*', (req, res) => {
@@ -893,6 +1060,95 @@ function startPythonBot() {
         }
     });
 }
+
+// --- API для генерации токена регистрации (для Minecraft-плагина) ---
+app.post('/api/generateRegToken', async (req, res) => {
+    const { nickname } = req.body;
+    if (!nickname) {
+        return res.status(400).json({ message: 'Требуется никнейм игрока' });
+    }
+
+    try {
+        const user = await prisma.user.findUnique({ where: { nickname } });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Пользователь с таким никнеймом не найден в базе данных' });
+        }
+
+        if (user.password) {
+            return res.status(400).json({ message: 'Этот пользователь уже зарегистрирован и имеет пароль' });
+        }
+
+        const registrationToken = uuidv4();
+        const tokenExpires = new Date(Date.now() + 3600000); // Токен действителен 1 час
+
+        await prisma.user.update({
+            where: { nickname },
+            data: {
+                registrationToken: registrationToken,
+                tokenExpires: tokenExpires
+            }
+        });
+
+        const registrationLink = `https://cuptam4ik.ru/register_utf8.html?token=${registrationToken}`;
+        
+        console.log(`Сгенерирована ссылка для регистрации для ${nickname}: ${registrationLink}`);
+        res.json({ 
+            message: `Токен для регистрации ${nickname} успешно сгенерирован.`,
+            token: registrationToken,
+            registrationLink: registrationLink // Отправляем ссылку для удобства тестирования
+        });
+
+    } catch (error) {
+        console.error('Ошибка генерации токена:', error);
+        res.status(500).json({ message: 'Внутренняя ошибка сервера при генерации токена' });
+    }
+});
+
+app.post('/api/completeRegistration', async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+        return res.status(400).json({ message: 'Отсутствует токен или пароль' });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({ message: 'Пароль должен содержать не менее 6 символов' });
+    }
+
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                registrationToken: token,
+            }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Неверный или уже использованный токен регистрации' });
+        }
+
+        if (new Date() > user.tokenExpires) {
+            return res.status(400).json({ message: 'Срок действия токена истек. Пожалуйста, запросите новый.' });
+        }
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                registrationToken: null, // Очищаем токен после использования
+                tokenExpires: null
+            }
+        });
+        
+        res.status(200).json({ message: 'Регистрация успешно завершена!' });
+
+    } catch (error) {
+        console.error('Ошибка завершения регистрации:', error);
+        res.status(500).json({ message: 'Внутренняя ошибка сервера' });
+    }
+});
 
 // Start the server
 server.listen(PORT, () => {

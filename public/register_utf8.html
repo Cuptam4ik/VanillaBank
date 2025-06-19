@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Регистрация в банке Minecraft</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="overflow:auto;">
+  <div class="navbar">
+    <div class="logo">
+      <img src="images/logo.png" alt="Logo" width="48" height="40" style="margin-right: 8px;">
+      VoidSeven
+    </div>
+  </div>
+  <div id="registration-container">
+    <div class="auth-card">
+      <h2 class="modal-title" style="text-align:center;margin-bottom:1.5rem;">Регистрация аккаунта</h2>
+      <form id="reg-form" autocomplete="off">
+        <label for="password" style="display:block;margin-bottom:0.3rem;font-size:1rem;">Придумайте пароль</label>
+        <input type="password" id="password" class="modal-input" placeholder="Введите пароль" required minlength="6" style="margin-bottom:1rem;" />
+        <label for="password2" style="display:block;margin-bottom:0.3rem;font-size:1rem;">Подтвердите пароль</label>
+        <input type="password" id="password2" class="modal-input" placeholder="Повторите пароль" required minlength="6" style="margin-bottom:1.5rem;" />
+        <button type="submit" class="modal-button" style="width:100%;margin-bottom:1rem;">Зарегистрироваться</button>
+        <div id="reg-status" class="modal-status" style="text-align:center;"></div>
+      </form>
+      <div style="margin-top:1.5rem;font-size:0.95em;color:var(--text-muted);text-align:center;">
+        Придумайте сложный пароль. Никому не сообщайте его.<br>Ссылка действительна ограниченное время.
+      </div>
+    </div>
+  </div>
+  <script>
+    function getTokenFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('token');
+    }
+    const form = document.getElementById('reg-form');
+    const statusDiv = document.getElementById('reg-status');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusDiv.textContent = '';
+      const password = document.getElementById('password').value;
+      const password2 = document.getElementById('password2').value;
+      if (password.length < 6) {
+        statusDiv.textContent = 'Пароль должен быть не короче 6 символов.';
+        statusDiv.style.color = '#FB4848';
+        return;
+      }
+      if (password !== password2) {
+        statusDiv.textContent = 'Пароли не совпадают!';
+        statusDiv.style.color = '#FB4848';
+        return;
+      }
+      const token = getTokenFromURL();
+      if (!token) {
+        statusDiv.textContent = 'Ошибка: отсутствует токен регистрации.';
+        statusDiv.style.color = '#FB4848';
+        return;
+      }
+      statusDiv.textContent = 'Отправка запроса...';
+      statusDiv.style.color = '#A0A0B0';
+      try {
+        const res = await fetch('/api/completeRegistration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const authCard = document.querySelector('.auth-card');
+          authCard.innerHTML = `
+            <h2 class="modal-title" style="text-align:center;">Регистрация успешна!</h2>
+            <p style="text-align:center; font-size: 1rem; color: var(--text-muted); padding: 1rem 0;">
+              Вы можете закрыть данное окно.
+            </p>
+          `;
+        } else {
+          statusDiv.textContent = data.message || 'Ошибка регистрации.';
+          statusDiv.style.color = '#FB4848';
+        }
+      } catch (err) {
+        statusDiv.textContent = 'Сетевая ошибка. Попробуйте позже.';
+        statusDiv.style.color = '#FB4848';
+      }
+    });
+  </script>
+</body>
+</html>

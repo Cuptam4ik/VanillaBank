@@ -131,6 +131,29 @@ html, input, button { font-weight: 500; }
 }
 .filler { flex-grow: 1; }
 
+/* --- AUTH CARD --- */
+.auth-card {
+  border-radius: var(--border-radius-main);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border-color);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.5);
+  display: flex !important;
+  flex-direction: column;
+  opacity: 1 !important;
+  visibility: visible !important;
+  max-width: 380px;
+  width: 100%;
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+}
+
+#registration-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
 /* --- BANK CARD --- */
 .card {
   border-radius: var(--border-radius-main);
@@ -665,4 +688,17 @@ canvas#stars { display: none; }
 .suggestion-item:hover {
     background-color: var(--primary-accent);
     color: var(--text-color);
+}
+
+/* --- FIX FOR REGISTRATION PAGE --- */
+.registration-card {
+  display: flex !important;
+  flex-direction: column;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.75rem;
 }
