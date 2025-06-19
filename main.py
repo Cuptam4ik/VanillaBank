@@ -8,7 +8,10 @@ import threading # To run Flask in a separate thread
 import logging # To suppress Flask default logging
 
 # --- КОНФИГУРАЦИЯ БОТА ---
-TOKEN = '' # Unchanged
+TOKEN = os.getenv('DISCORD_TOKEN')
+if not TOKEN:
+    raise ValueError("Не найден токен DISCORD_TOKEN. Убедитесь, что вы создали файл .env и добавили в него DISCORD_TOKEN=ваш_токен")
+
 TARGET_CHANNEL_ID = 1378719631853748425 # Unchanged (for banker button in Discord)
 TARGET_ROLE_ID = 1377644087439655153    # Unchanged (for banker button in Discord)
 REQUIRED_CALLER_ROLE_ID = None
