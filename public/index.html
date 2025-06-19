@@ -132,11 +132,10 @@
     <!-- Auth Modal -->
     <div class="modal" id="auth-modal" style="display: none;">
       <div class="modal-content">
-        <h2 class="modal-title">Вход/Регистрация</h2>
+        <h2 class="modal-title">Вход</h2>
         <input type="text" id="auth-username" class="modal-input" placeholder="Введите имя пользователя" />
         <input type="password" id="auth-password" class="modal-input" placeholder="Введите пароль..." />
         <button id="auth-login-button" class="modal-button">Войти</button>
-        <button id="auth-reg-button" class="modal-button">Регистрация</button>
         <div id="auth-modal-status" class="modal-status"></div>
         <span class="error">Внимание! Уважаемые игроки, просьба не использовать пароли, соответсвующие вашим паролям на сервере Bixland в целях безопасности!</span>
       </div>
@@ -366,7 +365,6 @@
       const authUsernameInput = document.getElementById("auth-username");
       const authPasswordInput = document.getElementById("auth-password");
       const authLoginButton = document.getElementById("auth-login-button");
-      const authRegButton = document.getElementById("auth-reg-button");
       const authModalStatus = document.getElementById("auth-modal-status");
 
       const cardOpModal = document.getElementById("card-op-modal");
@@ -514,27 +512,6 @@
           showAuthModalStatus(data?.message || "Ошибка входа", true);
         }
       });
-
-      authRegButton.addEventListener("click", async () => {
-        const nickname = authUsernameInput.value.trim();
-        const password = authPasswordInput.value.trim();
-
-        if (!nickname || !password) {
-          showAuthModalStatus("Пожалуйста, заполните все поля.", true);
-          return;
-        }
-        showAuthModalStatus("Регистрация...");
-        const data = await apiCall("/api/register", "POST", {nickname, password});
-        if (data && data.user) {
-          currentUser = data.user;
-          updateUIForUser();
-          updateUIForRole();
-          closeAuthModal();
-        } else {
-           showAuthModalStatus(data?.message || "Ошибка регистрации", true);
-        }
-      });
-
       exitBtn.addEventListener("click", async () => {
         await apiCall('/api/logout', 'POST');
         currentUser = null;

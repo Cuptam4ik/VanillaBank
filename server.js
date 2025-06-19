@@ -44,22 +44,36 @@ const bot = new Client({
 // --- Express Middleware ---
 app.use(cors());
 
-// Альтернативный способ отдачи страницы регистрации, чтобы обойти кэш
-app.get('/register.html', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'register_utf8.html');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Ошибка при чтении файла register.html:', err);
-            return res.status(500).send('Ошибка при загрузке страницы регистрации.');
-        }
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.send(data);
-    });
+// Пользовательский middleware для обработки JSON-тела для специфического маршрута
+// Это необходимо из-за необъяснимой проблемы, когда express.json() не справляется
+app.use((req, res, next) => {
+    // Применяем только к нужному маршруту
+    if (req.path === '/api/generateRegToken' && req.method === 'POST' && req.headers['content-type'] === 'application/json; utf-8') {
+        let rawData = '';
+        req.on('data', (chunk) => {
+            rawData += chunk;
+        });
+        req.on('end', () => {
+            try {
+                // После получения всех данных, парсим их и помещаем в req.body
+                req.body = JSON.parse(rawData);
+                next(); // Передаем управление дальше ПОСЛЕ обработки тела
+            } catch (e) {
+                console.error("Error parsing JSON body:", e);
+                res.status(400).send('Bad JSON format');
+            }
+        });
+    } else {
+        // Для всех остальных запросов пропускаем дальше
+        next();
+    }
 });
+
+// Добавляем стандартный парсер для всех остальных JSON-запросов
+app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use(express.json());
 
 const sessionMiddleware = session({
     secret: 'NZehHqz2KQywsVMnksisrC6KXfuw4xuBFOTFXbdSvxp0pBnOlCi5dilemppSX2YO',
@@ -158,7 +172,7 @@ app.post('/api/login', async (req, res) => {
         const user = await prisma.user.findUnique({ where: { nickname } });
         if (!user) return res.status(404).json({ message: 'Пользователь не найден!' });
         let passwordMatch = false;
-        if (user.password && user.password.startsWith('$2a$')) {
+        if (user.password && user.password.startsWith('$2b$')) {
             passwordMatch = await bcrypt.compare(password, user.password);
         } else {
             passwordMatch = (password === user.password);
@@ -172,27 +186,6 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ message: 'Ошибка сервера при входе' });
-    }
-});
-
-app.post('/api/register', async (req, res) => {
-    const { nickname, password } = req.body;
-    if (!nickname || !password) return res.status(400).json({ message: 'Введите никнейм и пароль' });
-    try {
-        const existingUser = await prisma.user.findUnique({ where: { nickname } });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Данное имя пользователя уже занято!' });
-        }
-        const newCardNumber = await generateUniqueCardNumber();
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await prisma.user.create({
-            data: { cardNumber: newCardNumber, nickname, password: hashedPassword }
-        });
-        req.session.userId = user.id;
-        res.status(201).json({ message: 'Регистрация завершена успешно!', user: { ...user, unpaidFinesCount: 0 } });
-    } catch (error) {
-        console.error("Registration error:", error);
-        res.status(500).json({ message: 'Ошибка сервера при регистрации' });
     }
 });
 
@@ -351,7 +344,7 @@ app.post('/api/player/transfer', userAuth, checkFrozenAccount, async (req, res) 
         return res.status(400).json({ message: 'Неверные данные для перевода' });
     }
     if (parseInt(senderCardNumber) === parseInt(receiverCardNumber)) {
-        return res.status(400).json({ message: 'Нельзя перевести средства самому себе' });
+        return res.status(400).json({ message: 'Нельзя переводить средства самому себе' });
     }
     if (req.user.cardNumber !== parseInt(senderCardNumber)) {
         return res.status(403).json({ message: 'Вы можете переводить средства только со своей карты.' });
@@ -1063,16 +1056,30 @@ function startPythonBot() {
 
 // --- API для генерации токена регистрации (для Minecraft-плагина) ---
 app.post('/api/generateRegToken', async (req, res) => {
+    // Убираем лишнее логирование, оставляем только ключевое
+    console.log('--- Request to /api/generateRegToken ---');
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+
     const { nickname } = req.body;
     if (!nickname) {
         return res.status(400).json({ message: 'Требуется никнейм игрока' });
     }
 
     try {
-        const user = await prisma.user.findUnique({ where: { nickname } });
+        let user = await prisma.user.findUnique({ where: { nickname } });
         
+        // Если пользователь не найден, создаем его
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь с таким никнеймом не найден в базе данных' });
+            console.log(`User ${nickname} not found. Creating a new user.`);
+            const newCardNumber = await generateUniqueCardNumber();
+            user = await prisma.user.create({
+                data: {
+                    nickname: nickname,
+                    cardNumber: newCardNumber,
+                    // Остальные поля будут установлены по умолчанию (например, balance=0)
+                }
+            });
+            console.log(`New user ${nickname} created with card number ${user.cardNumber}.`);
         }
 
         if (user.password) {
@@ -1090,7 +1097,7 @@ app.post('/api/generateRegToken', async (req, res) => {
             }
         });
 
-        const registrationLink = `https://cuptam4ik.ru/register_utf8.html?token=${registrationToken}`;
+        const registrationLink = `http://cuptam4ik.ru/register_utf8.html?token=${registrationToken}`;
         
         console.log(`Сгенерирована ссылка для регистрации для ${nickname}: ${registrationLink}`);
         res.json({ 
@@ -1165,4 +1172,10 @@ process.on('SIGINT', async () => {
     }
     await prisma.$disconnect();
     setTimeout(() => process.exit(0), 2000);
+});
+
+// Альтернативный способ отдачи страницы регистрации, чтобы обойти кэш
+app.get('/register.html', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'register_utf8.html');
+    res.sendFile(filePath);
 });
