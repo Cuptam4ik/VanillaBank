@@ -271,7 +271,6 @@ app.post('/api/logout', (req, res) => {
 app.post('/api/call/banker', userAuth, async (req, res) => {
     const userId = req.user.id;
     const userNickname = req.user.nickname;
-    const callerDiscordId = req.user.id.toString();
 
     const lastCallTime = callCooldowns.get(`banker_${userId}`);
     if (lastCallTime && (Date.now() - lastCallTime < CALL_COOLDOWN_DURATION)) {
@@ -283,7 +282,7 @@ app.post('/api/call/banker', userAuth, async (req, res) => {
         const botResponse = await fetch(BOT_API_URL + '/call-banker-sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Bot-Api-Secret': BOT_API_SECRET },
-            body: JSON.stringify({ user_nickname: userNickname, caller_id: callerDiscordId })
+            body: JSON.stringify({ user_nickname: userNickname })
         });
         const responseData = await botResponse.json().catch(() => null);
         if (!botResponse.ok) {
@@ -301,7 +300,6 @@ app.post('/api/call/banker', userAuth, async (req, res) => {
 app.post('/api/call/inspector', userAuth, async (req, res) => {
     const userId = req.user.id;
     const userNickname = req.user.nickname;
-    const callerDiscordId = req.user.id.toString();
 
     const lastCallTime = callCooldowns.get(`inspector_${userId}`);
     if (lastCallTime && (Date.now() - lastCallTime < CALL_COOLDOWN_DURATION)) {
@@ -313,7 +311,7 @@ app.post('/api/call/inspector', userAuth, async (req, res) => {
         const botResponse = await fetch(BOT_API_URL + '/call-inspector-sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Bot-Api-Secret': BOT_API_SECRET },
-            body: JSON.stringify({ user_nickname: userNickname, caller_id: callerDiscordId })
+            body: JSON.stringify({ user_nickname: userNickname })
         });
         const responseData = await botResponse.json().catch(() => null);
         if (!botResponse.ok) {
@@ -427,14 +425,16 @@ app.post('/api/player/pay-fine/:fineId', userAuth, checkFrozenAccount, async (re
                 where: { id: parseInt(fineId) },
                 data: { isPaid: true, paidAt: new Date() },
             }),
-            createTransaction({
-                 senderCardNumber: req.user.cardNumber,
-                 receiverCardNumber: TREASURY_CARD_NUMBER,
-                 amount: fineToPay.amount,
-                 type: TransactionType.FINE,
-                 operationBy: OperationBy.PLAYER,
-                 finePaymentForId: parseInt(fineId),
-                 reason: `Payment for fine #${fineId}`
+            prisma.transaction.create({
+                data: {
+                    senderCardNumber: req.user.cardNumber,
+                    receiverCardNumber: TREASURY_CARD_NUMBER,
+                    amount: fineToPay.amount,
+                    type: TransactionType.FINE,
+                    operationBy: OperationBy.PLAYER,
+                    finePaymentForId: parseInt(fineId),
+                    reason: `Payment for fine #${fineId}`
+                }
             })
         ]);
 
@@ -450,6 +450,9 @@ app.post('/api/player/pay-fine/:fineId', userAuth, checkFrozenAccount, async (re
 
     } catch (error) {
         console.error("Error paying fine:", error);
+        if (error.code === 'P2002') { // Prisma unique constraint violation
+            return res.status(409).json({ message: "Этот штраф уже был оплачен или платеж находится в обработке." });
+        }
         res.status(500).json({ message: "Ошибка при оплате штрафа" });
     }
 });
@@ -769,12 +772,20 @@ app.get('/api/admin/stats', userAuth, adminAuth, async (req, res) => {
 app.get('/api/admin/users', userAuth, adminAuth, async (req, res) => {
     const { search } = req.query;
     try {
+        const searchInt = parseInt(search, 10);
+        // Проверяем, является ли поисковый запрос числом
+        const isNumeric = !isNaN(searchInt) && searchInt.toString() === search;
+
         const users = await prisma.user.findMany({
+            // Используем динамическое построение запроса
             where: {
-                nickname: {
-                    contains: search || '',
-                    // mode: 'insensitive' // Not supported by SQLite
-                }
+                ...(search && { // Добавляем условие, только если `search` не пустой
+                    OR: [
+                        { nickname: { contains: search } },
+                        // Добавляем поиск по номеру карты, только если запрос числовой
+                        ...(isNumeric ? [{ cardNumber: searchInt }] : [])
+                    ]
+                })
             },
             orderBy: { createdAt: 'desc' },
             take: 50
@@ -910,20 +921,42 @@ app.get('/api/cases', userAuth, async (req, res) => {
 // Создать новое дело
 app.post('/api/cases', userAuth, async (req, res) => {
     const { title, reason, defendantId } = req.body;
-    if (!title || !defendantId) return res.status(400).json({ message: 'Требуется тема и ответчик' });
+    if (!title || !reason || !defendantId) {
+        return res.status(400).json({ message: 'Требуется заголовок, причина и ответчик' });
+    }
+
     try {
-        const newCase = await prisma.courtCase.create({
-            data: {
-                title,
-                reason,
-                plaintiffId: req.user.id,
-                defendantId: parseInt(defendantId),
-            },
-            include: {
-                plaintiff: { select: { id: true, nickname: true } },
-                defendant: { select: { id: true, nickname: true } },
-            }
+        // Используем транзакцию, чтобы обе операции выполнились вместе
+        const newCase = await prisma.$transaction(async (tx) => {
+            // 1. Создаем само дело
+            const createdCase = await tx.courtCase.create({
+                data: {
+                    title,
+                    reason, // Мы все еще сохраняем причину в самом деле для справки
+                    plaintiffId: req.user.id,
+                    defendantId: parseInt(defendantId),
+                }
+            });
+
+            // 2. Создаем первое сообщение в этом деле, используя текст причины
+            await tx.courtMessage.create({
+                data: {
+                    caseId: createdCase.id,    // <-- Связываем с только что созданным делом
+                    senderId: req.user.id,     // <-- Отправитель - это истец
+                    text: reason,              // <-- Текст сообщения - это причина из формы
+                }
+            });
+
+            // 3. Возвращаем полное дело с данными об участниках для отправки на фронтенд
+            return tx.courtCase.findUnique({
+                where: { id: createdCase.id },
+                include: {
+                    plaintiff: { select: { id: true, nickname: true } },
+                    defendant: { select: { id: true, nickname: true } },
+                }
+            });
         });
+
         res.status(201).json(newCase);
     } catch (e) {
         console.error('Ошибка создания дела:', e);
@@ -939,6 +972,7 @@ app.get('/api/cases/:id', userAuth, async (req, res) => {
             include: {
                 plaintiff: { select: { id: true, nickname: true } },
                 defendant: { select: { id: true, nickname: true } },
+                judge:     { select: { id: true, nickname: true } }
             }
         });
         if (!courtCase) return res.status(404).json({ message: 'Дело не найдено' });
@@ -952,11 +986,17 @@ app.get('/api/cases/:id', userAuth, async (req, res) => {
 // Получить сообщения по делу
 app.get('/api/cases/:id/messages', userAuth, async (req, res) => {
     try {
-        const messages = await prisma.courtMessage.findMany({
+        const messagesFromDb = await prisma.courtMessage.findMany({
             where: { caseId: parseInt(req.params.id) },
             orderBy: { createdAt: 'asc' },
             include: { sender: { select: { id: true, nickname: true } } }
         });
+        
+        const messages = messagesFromDb.map(msg => ({
+            ...msg,
+            isMine: msg.senderId === req.user.id
+        }));
+
         res.json(messages);
     } catch (e) {
         console.error('Ошибка получения сообщений дела:', e);
@@ -977,7 +1017,7 @@ app.post('/api/cases/:id/messages', userAuth, async (req, res) => {
             },
             include: { sender: { select: { id: true, nickname: true } } }
         });
-        res.status(201).json(newMsg);
+        res.status(201).json({ ...newMsg, isMine: true });
     } catch (e) {
         console.error('Ошибка отправки сообщения:', e);
         res.status(500).json({ message: 'Ошибка отправки сообщения' });
@@ -1097,7 +1137,7 @@ app.post('/api/generateRegToken', async (req, res) => {
             }
         });
 
-        const registrationLink = `http://cuptam4ik.ru/register_utf8.html?token=${registrationToken}`;
+        const registrationLink = `https://cuptam4ik.ru/register_utf8.html?token=${registrationToken}`;
         
         console.log(`Сгенерирована ссылка для регистрации для ${nickname}: ${registrationLink}`);
         res.json({ 

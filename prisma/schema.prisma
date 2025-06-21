@@ -10,6 +10,7 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+// Enums для типов данных
 enum OperationBy {
   PLAYER
   BANK
@@ -23,6 +24,13 @@ enum TransactionType {
   FINE
 }
 
+enum CaseStatus {
+  NEW
+  IN_PROGRESS
+  CLOSED
+}
+
+// Модели данных
 model User {
   id                   Int            @id @default(autoincrement())
   cardNumber           Int            @unique
@@ -34,20 +42,31 @@ model User {
   isAdmin              Boolean        @default(false)
   isJudge              Boolean        @default(false)
   isFrozen             Boolean        @default(false)
-  frozenById           Int?
-  frozenBy             User?          @relation("UserFrozen", fields: [frozenById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  frozeOthers          User[]         @relation("UserFrozen")
+  
+  // Поля для регистрации
+  registrationToken    String?        @unique
+  tokenExpires         DateTime?
+
+  createdAt            DateTime       @default(now())
+  discordId            String?        @unique
+
+  // Связи
   issuedFines          Fine[]         @relation("InspectorFines")
   fines                Fine[]         @relation("UserFines")
+  
   createdCases         CourtCase[]    @relation("PlaintiffCases")
   involvedInCases      CourtCase[]    @relation("DefendantCases")
-  sentMessages         CourtMessage[]
   judgedCases          CourtCase[]    @relation("JudgeCases")
+  sentMessages         CourtMessage[]
+
   issuedAdminLogs      AdminLog[]
   sentTransactions     Transaction[]  @relation("SenderTransactions")
   receivedTransactions Transaction[]  @relation("ReceiverTransactions")
-  registrationToken    String?        @unique
-  tokenExpires         DateTime?
+
+  // Связь для заморозки (кто заморозил)
+  frozenById           Int?
+  frozenBy             User?          @relation("UserFrozen", fields: [frozenById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frozeOthers          User[]         @relation("UserFrozen")
 }
 
 model Transaction {
@@ -93,8 +112,8 @@ model AdminLog {
 model CourtCase {
   id          Int            @id @default(autoincrement())
   title       String
-  reason      String
-  status      String         @default("NEW") // NEW, IN_PROGRESS, CLOSED
+  reason      String         // <--- ИЗМЕНЕНИЕ ЗДЕСЬ: @db.Text убрано
+  status      CaseStatus     @default(NEW)
   plaintiffId Int
   plaintiff   User           @relation("PlaintiffCases", fields: [plaintiffId], references: [id])
   defendantId Int
@@ -113,14 +132,6 @@ model CourtMessage {
   case      CourtCase @relation(fields: [caseId], references: [id])
   senderId  Int
   sender    User      @relation(fields: [senderId], references: [id])
-  text      String
+  text      String    // <--- ИЗМЕНЕНИЕ ЗДЕСЬ: @db.Text убрано
   createdAt DateTime  @default(now())
-}
-
-model registrationToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  nickname  String
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
 }

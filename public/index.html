@@ -137,10 +137,9 @@
         <input type="password" id="auth-password" class="modal-input" placeholder="Введите пароль..." />
         <button id="auth-login-button" class="modal-button">Войти</button>
         <div id="auth-modal-status" class="modal-status"></div>
-        <span class="error">Внимание! Уважаемые игроки, просьба не использовать пароли, соответсвующие вашим паролям на сервере Bixland в целях безопасности!</span>
+        <span class=></span>
       </div>
     </div>
-
     <div class="color-picker-modal" id="colorPickerModal">
           <div class="color-option" data-color="#EA4242" data-gradient-end="#C0392B">
               <span class="color-name">Красный</span>
@@ -170,6 +169,10 @@
       <button id="bank-btn" class="menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"><path fill="currentColor" d="M9.368 1.222a1 1 0 0 0-1.414.15L5.058 5h1.28l2.397-3.004l.77.629L7.575 5h1.288l1.417-1.744l1.718 1.403L11.7 5h.3a3 3 0 0 1 .88.131a1 1 0 0 0-.25-1.245zM3 5.5a.5.5 0 0 1 .5-.5h.558l.795-1H3.5A1.5 1.5 0 0 0 2 5.5v6A2.5 2.5 0 0 0 4.5 14H12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H3.5a.5.5 0 0 1-.5-.5m7.5 4.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1"/></svg>
         <span>Банк</span>
+      </button>
+      <button id="court-btn" class="menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18 2h-6a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4a2 2 0 0 0-2-2m-6 2h6v2h-6zM4 8h16v10H4z"/><path fill="currentColor" d="M14.28 10.43a1 1 0 0 0-1.06 0l-1 1a1 1 0 0 0 0 1.41l4.59 4.59a1 1 0 0 0 1.41 0l1-1a1 1 0 0 0 0-1.41zm-2.83 3.54l1.42-1.42l1.41 1.41l-1.41 1.42z"/></svg>
+        <span>Суд</span>
       </button>
       <!-- Только для банкира или админа -->
       <button id="bank-managment-btn" class="menu" style="display: none;">
@@ -308,6 +311,14 @@
                   <button id="remove-inspector-btn" class="action">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 14c2.67 0 8 1.33 8 4v2H7v-2c0-2.67 5.33-4-8-4m0-2a4 4 0 0 1-4-4a4 4 0 0 1 4-4a4 4 0 0 1 4 4a4 4 0 0 1-4 4M5 9.59l2.12-2.13l1.42 1.42L6.41 11l2.13 2.12l-1.42 1.42L5 12.41l-2.12 2.13l-1.42-1.42L3.59 11L1.46 8.88l1.42-1.42z"/></svg>
                       Снять инспектора</button>
+                  <button id="add-judge-btn" class="action">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18 2h-6a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4a2 2 0 0 0-2-2m-6 2h6v2h-6zM4 8h16v10H4z"/><path fill="currentColor" d="M14.28 10.43a1 1 0 0 0-1.06 0l-1 1a1 1 0 0 0 0 1.41l4.59 4.59a1 1 0 0 0 1.41 0l1-1a1 1 0 0 0 0-1.41zm-2.83 3.54l1.42-1.42l1.41 1.41l-1.41 1.42z"/></svg>
+                    Назначить судью
+                  </button>
+                  <button id="remove-judge-btn" class="action">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.12 9.33L15.46 3.68l-2.12 2.12l5.66 5.65zm-5.66-2.83L12.63 3.68L3.68 12.63l2.83 2.83l-3.18 3.18l-1.42-1.42l-1.06 1.06l1.42 1.42l-1.06 1.06l1.42 1.42l1.06-1.06l1.42 1.42l-1.06 1.06l1.42 1.42l1.06-1.06l1.42 1.42l3.18-3.18l2.83 2.83l8.95-8.95zM9.83 15.41L8.41 14l5.66-5.66l1.41 1.41z"/></svg>
+                    Снять судью
+                  </button>
               </div>
           </div>
           
@@ -334,6 +345,58 @@
            <div id="transaction-list" class="transaction-list">
            </div>
        </div>
+
+       <!-- Court Pages -->
+       <div id="court-page">
+          <div class="court-header">
+              <div class="court-search-container">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/></svg>
+                  <input type="text" id="court-search-input" placeholder="Поиск" class="modal-input">
+              </div>
+              <button id="court-new-case-btn" class="action">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"/></svg>
+                  <span>Подать дело</span>
+              </button>
+          </div>
+          <div id="court-tabs-container" class="court-tabs">
+              <button class="court-tab-btn active" data-filter="NEW">Новые</button>
+              <button class="court-tab-btn" data-filter="IN_PROGRESS">В процессе</button>
+              <button class="court-tab-btn" data-filter="MINE">Мои дела</button>
+              <button class="court-tab-btn" data-filter="CLOSED">Архив</button>
+          </div>
+          <div id="court-cases-grid" class="court-grid">
+              <!-- Case cards will be dynamically inserted here -->
+          </div>
+       </div>
+
+       <div id="court-new-case-page">
+          <button id="court-back-to-list-btn" class="back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z"/></svg>
+            <span>Подать дело в суд</span>
+          </button>
+          <div class="new-case-form-container">
+            <div class="new-case-instructions">
+              <p>1. Причина подачи. (Например: убийство, гриф, кража и т.д.)</p>
+              <p>2. Краткое описание дела. (Расшипите, что произошло)</p>
+              <p>3. Требования</p>
+              <p>4. Пруфы</p>
+              <p class="instruction-warning">(Дело подаётся СТРОГО в этой форме, иначе оно будет отклонено.)</p>
+            </div>
+            <input id="new-case-title" type="text" class="modal-input" placeholder="Заголовок">
+            <div class="input-with-suggestions">
+                <input id="new-case-defendant" type="text" class="modal-input" placeholder="На кого дело? (Никнейм)" autocomplete="off">
+                <div id="new-case-defendant-suggestions" class="suggestions-dropdown"></div>
+            </div>
+            <textarea id="new-case-reason" class="modal-input" placeholder="Причина подачи (описание, требования, пруфы...)" rows="10"></textarea>
+            <button id="new-case-submit-btn" class="action">Подать</button>
+            <div id="new-case-status" class="modal-status"></div>
+          </div>
+       </div>
+
+       <div id="court-case-detail-page">
+          <!-- Case details will be dynamically inserted here -->
+       </div>
+
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -345,6 +408,7 @@
 
       // --- Menu Buttons ---
       const bankBtn = document.getElementById("bank-btn");
+      const courtBtn = document.getElementById("court-btn"); // New
       const bankManagmentBtn = document.getElementById("bank-managment-btn");
       const inspectorPanelBtn = document.getElementById("inspector-panel-btn");
       const adminPanelBtn = document.getElementById("admin-panel-btn");
@@ -358,7 +422,10 @@
       const inspectorPage = document.getElementById("inspector-page");
       const adminPage = document.getElementById("admin-page");
       const bankTransactionsPage = document.getElementById("bank-transactions-page");
-      const allPages = [welcomeDiv, bankPage, bankManagementPage, inspectorPage, adminPage, bankTransactionsPage];
+      const courtPage = document.getElementById("court-page"); // New
+      const courtNewCasePage = document.getElementById("court-new-case-page"); // New
+      const courtCaseDetailPage = document.getElementById("court-case-detail-page"); // New
+      const allPages = [welcomeDiv, bankPage, bankManagementPage, inspectorPage, adminPage, bankTransactionsPage, courtPage, courtNewCasePage, courtCaseDetailPage];
 
       // --- Modals & Their Content ---
       const authModal = document.getElementById("auth-modal");
@@ -430,6 +497,8 @@
       const removeBankerBtn = document.getElementById("remove-banker-btn");
       const addInspectorBtn = document.getElementById("add-inspector-btn");
       const removeInspectorBtn = document.getElementById("remove-inspector-btn");
+      const addJudgeBtn = document.getElementById("add-judge-btn");
+      const removeJudgeBtn = document.getElementById("remove-judge-btn");
       const transactionsChartCanvas = document.getElementById('transactions-chart');
       let transactionsChart = null;
 
@@ -440,6 +509,20 @@
       let searchTimeout;
       let selectedUserForTransfer = null; // Для хранения {nickname, cardNumber}
 
+      // --- Court System Elements ---
+      const courtTabsContainer = document.getElementById("court-tabs-container");
+      const courtCasesGrid = document.getElementById("court-cases-grid");
+      const courtSearchInput = document.getElementById("court-search-input");
+      const courtNewCaseBtn = document.getElementById("court-new-case-btn");
+      const courtBackToListBtn = document.getElementById("court-back-to-list-btn");
+      const newCaseTitleInput = document.getElementById("new-case-title");
+      const newCaseDefendantInput = document.getElementById("new-case-defendant");
+      const newCaseDefendantSuggestions = document.getElementById("new-case-defendant-suggestions");
+      const newCaseReasonInput = document.getElementById("new-case-reason");
+      const newCaseSubmitBtn = document.getElementById("new-case-submit-btn");
+      const newCaseStatusDiv = document.getElementById("new-case-status");
+      let selectedDefendantForCase = null;
+      let courtSearchTimeout;
 
       let menuOpened = false;
       let currentUser = null;
@@ -555,25 +638,36 @@
       }
 
       function updateUIForRole() {
+          // 1. Сначала скрыть все кнопки, зависящие от роли
           bankManagmentBtn.style.display = "none";
           inspectorPanelBtn.style.display = "none";
           adminPanelBtn.style.display = "none";
           transactionsBtn.style.display = "none";
+          courtBtn.style.display = "none";
 
+          // 2. Если пользователь не залогинен, ничего не показывать
           if (!currentUser) return;
 
+          // 3. Показать кнопки, доступные всем залогиненным пользователям
+          courtBtn.style.display = "flex"; // Кнопка "Суд" видна всем
+          // Кнопка "Банк" видна по умолчанию, ее не трогаем
+
+          // 4. Получаем роли для удобства
           const isAdmin = currentUser.isAdmin;
           const isBanker = currentUser.isBanker;
           const isInspector = currentUser.isInspector;
+          // Роль судьи (isJudge) не дает доступа к этим панелям, поэтому ее здесь не проверяем
 
+          // 5. Показываем панели управления в зависимости от конкретной роли
           if (isBanker || isAdmin) {
               bankManagmentBtn.style.display = "flex";
-              transactionsBtn.style.display = "flex";
+              transactionsBtn.style.display = "flex"; // Банкиры и админы видят транзакции
           }
           if (isInspector || isAdmin) {
               inspectorPanelBtn.style.display = "flex";
           }
           if (isAdmin) {
+              // Панель администратора видна ТОЛЬКО админам
               adminPanelBtn.style.display = "flex";
           }
       }
@@ -968,6 +1062,7 @@
               if (user.isAdmin) rolesHTML += '<span class="role-tag admin">Админ</span>';
               if (user.isBanker) rolesHTML += '<span class="role-tag banker">Банкир</span>';
               if (user.isInspector) rolesHTML += '<span class="role-tag inspector">Инспектор</span>';
+              if (user.isJudge) rolesHTML += '<span class="role-tag judge">Судья</span>'; // Add Judge role
 
               let transactionsHTML = recentTransactions.length > 0
                   ? recentTransactions.map(tx => `<div class="transaction-item">
@@ -1007,13 +1102,26 @@
       }
 
       // --- Admin Role Management ---
-      function handleAdminRoleChange(endpoint, targetCardNumber, roleField, roleValue) {
-        if (!targetCardNumber) { showSingleInputModalStatus("Введите номер карты.", true); return; }
+      function handleAdminRoleChange(endpoint, targetCardNumber) {
+        if (!targetCardNumber) { 
+            showSingleInputModalStatus("Введите номер карты.", true); 
+            return; 
+        }
         showSingleInputModalStatus('Обработка...');
+        
         apiCall(endpoint, 'POST', { targetCardNumber }).then(data => {
             if (data && !data.error) {
                 showSingleInputModalStatus(data.message, false);
+
+                if (data.user && data.user.id === currentUser.id) {
+                    currentUser = data.user; 
+                    updateUIForRole();       
+                }
+
                 setTimeout(closeSingleInputModal, 2500);
+                if (adminPage.classList.contains('visible')) {
+                    loadAdminUsers(adminUserSearchInput.value);
+                }
             }
         });
       }
@@ -1021,25 +1129,39 @@
       addBankerBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Назначить банкира", "Номер карты игрока", "Назначить",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/add-banker', targetCardNumber, "isBanker", true)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/add-banker', targetCardNumber)
         );
       });
       removeBankerBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Снять роль банкира", "Номер карты игрока", "Снять роль",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-banker', targetCardNumber, "isBanker", false)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-banker', targetCardNumber)
         );
       });
       addInspectorBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Назначить инспектора", "Номер карты игрока", "Назначить",
-           (targetCardNumber) => handleAdminRoleChange('/api/admin/add-inspector', targetCardNumber, "isInspector", true)
+           (targetCardNumber) => handleAdminRoleChange('/api/admin/add-inspector', targetCardNumber)
         );
       });
       removeInspectorBtn.addEventListener("click", () => {
         if (!currentUser || !currentUser.isAdmin) return;
         showSingleInputModal("Снять роль инспектора", "Номер карты игрока", "Снять роль",
-          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-inspector', targetCardNumber, "isInspector", false)
+          (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-inspector', targetCardNumber)
+        );
+      });
+
+      addJudgeBtn.addEventListener("click", () => {
+        if (!currentUser || !currentUser.isAdmin) return;
+        showSingleInputModal("Назначить судью", "Номер карты игрока", "Назначить",
+            (targetCardNumber) => handleAdminRoleChange('/api/admin/add-judge', targetCardNumber)
+        );
+      });
+
+      removeJudgeBtn.addEventListener("click", () => {
+        if (!currentUser || !currentUser.isAdmin) return;
+        showSingleInputModal("Снять роль судьи", "Номер карты игрока", "Снять роль",
+            (targetCardNumber) => handleAdminRoleChange('/api/admin/remove-judge', targetCardNumber)
         );
       });
 
@@ -1050,67 +1172,81 @@
       });
 
       function openIssueFineExtendedModal() {
-        issueFineModalCardInput.value = ''; issueFineModalAmountInput.value = '';
-        issueFineModalReasonInput.value = ''; issueFineModalDaysInput.value = '';
-        issueFineExtendedModalStatus.textContent = ''; issueFineExtendedModalStatus.style.display = "none";
+        issueFineModalCardInput.value = '';
+        issueFineModalAmountInput.value = '';
+        issueFineModalReasonInput.value = '';
+        issueFineModalDaysInput.value = '';
+        issueFineExtendedModalStatus.textContent = '';
+        issueFineExtendedModalStatus.style.display = "none";
         issueFineExtendedModal.style.display = "flex";
         overlay.classList.add("show");
       }
-
+      
       issueFineExtendedModalButton.addEventListener("click", async () => {
-          const targetCardNumber = issueFineModalCardInput.value.trim();
-          const amount = parseInt(issueFineModalAmountInput.value, 10);
-          const reason = issueFineModalReasonInput.value.trim();
-          const daysUntilDue = parseInt(issueFineModalDaysInput.value, 10);
+        const cardNumber = issueFineModalCardInput.value.trim();
+        const amount = parseInt(issueFineModalAmountInput.value.trim(), 10);
+        const reason = issueFineModalReasonInput.value.trim();
+        const daysToExpire = parseInt(issueFineModalDaysInput.value.trim(), 10);
 
-          if (!targetCardNumber || !amount || amount <= 0 || !daysUntilDue || daysUntilDue <=0) {
-              issueFineExtendedModalStatus.textContent = 'Заполните карту, сумму и срок (>0 дней).';
-              issueFineExtendedModalStatus.style.color = "#FB4848";
-              issueFineExtendedModalStatus.style.display = "block";
-              return;
-          }
-          issueFineExtendedModalStatus.textContent = 'Выписка штрафа...';
-          issueFineExtendedModalStatus.style.color = "#4CAF50";
-          issueFineExtendedModalStatus.style.display = "block";
+        if (!cardNumber || !amount || !daysToExpire) {
+            showIssueFineModalStatus("Заполните все обязательные поля.", true);
+            return;
+        }
+        if (amount <= 0 || daysToExpire <= 0) {
+            showIssueFineModalStatus("Сумма и срок должны быть больше нуля.", true);
+            return;
+        }
 
-          const data = await apiCall('/api/inspector/issue-fine', 'POST', { targetCardNumber, amount, reason, daysUntilDue });
-          if (data && data.fine) {
-              issueFineExtendedModalStatus.textContent = data.message;
-              setTimeout(() => {
-                issueFineExtendedModal.style.display = "none";
-                overlay.classList.remove("show");
-              }, 2500);
-          } else {
-              issueFineExtendedModalStatus.textContent = data.message || 'Ошибка при выписке штрафа.';
-              issueFineExtendedModalStatus.style.color = "#FB4848";
-          }
-      });
-      issueFineExtendedModal.addEventListener("click", (e) => {
-        if (e.target === issueFineExtendedModal) {
-            issueFineExtendedModal.style.display = "none";
-            overlay.classList.remove("show");
+        showIssueFineModalStatus("Выдача штрафа...");
+
+        const data = await apiCall('/api/inspector/issue-fine', 'POST', { 
+            targetCardNumber: cardNumber, 
+            amount, 
+            reason, 
+            daysUntilDue: daysToExpire 
+        });
+
+        if (data && data.fine) {
+            showIssueFineModalStatus("Штраф успешно выдан.", false);
+            setTimeout(() => {
+                closeIssueFineModal();
+                loadOverdueFines(); // Обновляем список штрафов в панели
+            }, 1500);
+        } else {
+            showIssueFineModalStatus(data?.message || data?.error || "Ошибка выдачи штрафа.", true);
         }
       });
 
-      async function loadInspectorOverdueFines() {
-        if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) return;
-        inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Загрузка...</div>';
-        const fines = await apiCall('/api/inspector/my-overdue-fines', 'GET');
+      function closeIssueFineModal() {
+          issueFineExtendedModal.style.display = "none";
+          overlay.classList.remove("show");
+      }
 
-        if (!fines) { inspectorOverdueFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>'; return; }
-        if (fines.length === 0) { inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Нет просроченных штрафов.</div>'; return; }
-        
-        inspectorOverdueFinesListDiv.innerHTML = '';
-        fines.forEach(fine => {
-            const item = `<div class="transaction-item">
-                <span class="transaction-type">Просрочен!</span>
-                <span class="transaction-amount" style="color: #F44336;">${fine.amount} аб</span>
-                <span class="transaction-date">Срок: ${formatDateTimeWithoutSeconds(fine.dueDate)}</span>
-                <div><span class="transaction-sender">Кому: ${fine.user.nickname}</span><span class="transaction-card-number">${fine.user.cardNumber}</span></div>
-                <div><span class="transaction-receiver">Причина: ${fine.reason || '-'}</span></div>
-            </div>`;
-            inspectorOverdueFinesListDiv.innerHTML += item;
-        });
+      function showIssueFineModalStatus(message, isError = false) {
+          issueFineExtendedModalStatus.textContent = message;
+          issueFineExtendedModalStatus.style.color = isError ? "#FB4848" : "#4CAF50";
+          issueFineExtendedModalStatus.style.display = "block";
+      }
+
+      async function loadOverdueFines() {
+          if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) return;
+          inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Загрузка...</div>';
+          const fines = await apiCall('/api/inspector/my-overdue-fines', 'GET');
+
+          if (!fines) { inspectorOverdueFinesListDiv.innerHTML = '<div class="error">Не удалось загрузить штрафы.</div>'; return; }
+          if (fines.length === 0) { inspectorOverdueFinesListDiv.innerHTML = '<div class="info">Нет просроченных штрафов.</div>'; return; }
+          
+          inspectorOverdueFinesListDiv.innerHTML = '';
+          fines.forEach(fine => {
+              const item = `<div class="transaction-item">
+                  <span class="transaction-type">Просрочен!</span>
+                  <span class="transaction-amount" style="color: #F44336;">${fine.amount} аб</span>
+                  <span class="transaction-date">Срок: ${formatDateTimeWithoutSeconds(fine.dueDate)}</span>
+                  <div><span class="transaction-sender">Кому: ${fine.user.nickname}</span><span class="transaction-card-number">${fine.user.cardNumber}</span></div>
+                  <div><span class="transaction-receiver">Причина: ${fine.reason || '-'}</span></div>
+              </div>`;
+              inspectorOverdueFinesListDiv.innerHTML += item;
+          });
       }
 
 
@@ -1184,6 +1320,7 @@
                   if (user.isAdmin) rolesHTML += '<span class="role-tag admin">Админ</span>';
                   if (user.isBanker) rolesHTML += '<span class="role-tag banker">Банкир</span>';
                   if (user.isInspector) rolesHTML += '<span class="role-tag inspector">Инспектор</span>';
+                  if (user.isJudge) rolesHTML += '<span class="role-tag judge">Судья</span>';
                   if (user.isFrozen) rolesHTML += '<span class="frozen-indicator">Заморожен</span>';
 
                   const userItem = document.createElement('div');
@@ -1292,7 +1429,7 @@
       inspectorPanelBtn.addEventListener("click", async () => {
         if (!currentUser || (!currentUser.isInspector && !currentUser.isAdmin)) { showAuthModal(); return; }
         showPage(inspectorPage);
-        await loadInspectorOverdueFines();
+        await loadOverdueFines();
         closeMenu();
       });
       adminPanelBtn.addEventListener("click", async () => {
@@ -1352,50 +1489,40 @@
 
         const users = await apiCall(endpoint, 'GET');
         if (users && Array.isArray(users)) {
-            displaySuggestions(users, mode); // Передаем режим для правильного отображения
+            displaySuggestions(users, mode, nicknameSuggestionsDiv, (user) => {
+                if (mode === 'nickname') cardOpModalInput1.value = user.nickname;
+                else cardOpModalInput1.value = user.cardNumber;
+                selectedUserForTransfer = user;
+            });
         }
     }, 300); // Debounce
 });
       
-      function displaySuggestions(users, mode) {
-    nicknameSuggestionsDiv.innerHTML = '';
-    if (users.length === 0) {
-        nicknameSuggestionsDiv.style.display = 'none';
-        return;
-    }
-
-    users.forEach(user => {
-        const suggestionItem = document.createElement('div');
-        suggestionItem.className = 'suggestion-item';
-        
-        // Отображаем в зависимости от режима: "Ник (Карта)" или "Карта (Ник)"
-        if (mode === 'nickname') {
-            suggestionItem.textContent = `${user.nickname} (${user.cardNumber})`;
-        } else { 
-            suggestionItem.textContent = `${user.cardNumber} (${user.nickname})`;
+      function displaySuggestions(users, mode, suggestionsDiv, onSelectCallback) {
+        suggestionsDiv.innerHTML = '';
+        if (users.length === 0) {
+            suggestionsDiv.style.display = 'none';
+            return;
         }
-        
-        suggestionItem.addEventListener('click', () => {
-            // Заполняем инпут в зависимости от режима
-            if (mode === 'nickname') {
-                cardOpModalInput1.value = user.nickname;
-            } else {
-                cardOpModalInput1.value = user.cardNumber;
-            }
-            selectedUserForTransfer = { nickname: user.nickname, cardNumber: user.cardNumber };
-            nicknameSuggestionsDiv.style.display = 'none';
-        });
-        nicknameSuggestionsDiv.appendChild(suggestionItem);
-    });
-    nicknameSuggestionsDiv.style.display = 'block';
-}
 
-      // Закрывать подсказки при клике вне
-      document.addEventListener('click', (e) => {
-          if (!nicknameSuggestionsDiv.contains(e.target) && e.target !== cardOpModalInput1) {
-              nicknameSuggestionsDiv.style.display = 'none';
-          }
-      });
+        users.forEach(user => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            
+            if (mode === 'nickname') {
+                suggestionItem.textContent = `${user.nickname} (${user.cardNumber})`;
+            } else { 
+                suggestionItem.textContent = `${user.cardNumber} (${user.nickname})`;
+            }
+            
+            suggestionItem.addEventListener('click', () => {
+                onSelectCallback(user);
+                suggestionsDiv.style.display = 'none';
+            });
+            suggestionsDiv.appendChild(suggestionItem);
+        });
+        suggestionsDiv.style.display = 'block';
+      }
 
       // --- API Call Helper ---
       async function apiCall(endpoint, method, body) {
@@ -1440,6 +1567,7 @@
         if (issueFineExtendedModal.style.display === 'flex') return issueFineExtendedModalStatus;
         if (playerFinesModal.style.display === 'flex') return playerFinesModalStatus;
         if (callStaffModal.style.display === 'flex') return callStaffModalStatus;
+        if (newCaseStatusDiv.style.display === 'block') return newCaseStatusDiv;
         return null;
       }
 
@@ -1480,7 +1608,284 @@
               colorPickerModal.classList.remove('visible');
           }
       });
+      
+      // --- Court System Logic ---
 
+      courtBtn.addEventListener("click", () => {
+          if (!currentUser) { showAuthModal(); return; }
+          showPage(courtPage);
+          loadCourtCases();
+          closeMenu();
+      });
+
+      courtNewCaseBtn.addEventListener("click", () => {
+          showPage(courtNewCasePage);
+          // Reset form
+          newCaseTitleInput.value = '';
+          newCaseDefendantInput.value = '';
+          newCaseReasonInput.value = '';
+          selectedDefendantForCase = null;
+          newCaseStatusDiv.style.display = 'none';
+      });
+      
+      courtBackToListBtn.addEventListener("click", () => {
+          showPage(courtPage);
+      });
+
+      courtTabsContainer.addEventListener("click", (e) => {
+        if(e.target.classList.contains('court-tab-btn')) {
+          document.querySelector('.court-tab-btn.active').classList.remove('active');
+          e.target.classList.add('active');
+          loadCourtCases();
+        }
+      });
+      
+      courtSearchInput.addEventListener('input', () => {
+          clearTimeout(courtSearchTimeout);
+          courtSearchTimeout = setTimeout(() => {
+              loadCourtCases();
+          }, 500);
+      });
+      
+      async function loadCourtCases() {
+          const activeTab = document.querySelector('.court-tab-btn.active');
+          const filter = activeTab.dataset.filter;
+          const searchQuery = courtSearchInput.value.trim();
+          
+          let url = '/api/cases?';
+          if (filter === 'MINE') {
+              url += 'mine=true';
+          } else {
+              url += `status=${filter}`;
+          }
+          if (searchQuery) {
+              url += `&search=${searchQuery}`;
+          }
+          
+          courtCasesGrid.innerHTML = '<div class="info">Загрузка дел...</div>';
+          const cases = await apiCall(url, 'GET');
+
+          if(cases && Array.isArray(cases)) {
+              courtCasesGrid.innerHTML = '';
+              if (cases.length === 0) {
+                  courtCasesGrid.innerHTML = '<div class="info">Дел не найдено.</div>';
+                  return;
+              }
+              cases.forEach(c => courtCasesGrid.appendChild(renderCaseCard(c)));
+          } else {
+              courtCasesGrid.innerHTML = '<div class="error">Ошибка загрузки дел.</div>';
+          }
+      }
+
+      function renderCaseCard(caseData) {
+        const card = document.createElement('div');
+        card.className = 'court-case-card';
+        card.dataset.caseId = caseData.id;
+
+        const getStatusText = (status) => {
+          const statuses = { 'NEW': 'Открыто', 'IN_PROGRESS': 'В процессе', 'CLOSED': 'Закрыто' };
+          return statuses[status] || status;
+        }
+
+        card.innerHTML = `
+          <div class="case-card-header">
+              <span class="case-status status-${caseData.status.toLowerCase()}">${getStatusText(caseData.status)}</span>
+              <span class="case-time">${timeSince(new Date(caseData.createdAt))}</span>
+          </div>
+          <div class="case-card-title">#${caseData.id}: ${caseData.title}</div>
+          <div class="case-card-footer">
+              <div class="case-participant">
+                  <img src="https://mc-heads.net/avatar/${caseData.plaintiff.nickname}/32" alt="">
+                  <span>${caseData.plaintiff.nickname}</span>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="case-arrow"><path fill="currentColor" d="M4 12V2h16v10h-2V4H6v8zm14 2v2h2v-2zm-2 2h-2v-2h2zm-2 0v2h-2v-2zm-2 0h-2v-2h2zm-4 0v2H8v-2zm6-4h2v2h-2z"/></svg>
+              <div class="case-participant">
+                  <img src="https://mc-heads.net/avatar/${caseData.defendant.nickname}/32" alt="">
+                  <span>${caseData.defendant.nickname}</span>
+              </div>
+          </div>
+        `;
+        card.addEventListener('click', () => showCaseDetailPage(caseData.id));
+        return card;
+      }
+
+      async function showCaseDetailPage(caseId) {
+        showPage(courtCaseDetailPage);
+        courtCaseDetailPage.innerHTML = '<div class="info">Загрузка дела...</div>';
+
+        const caseData = await apiCall(`/api/cases/${caseId}`);
+        if (!caseData || caseData.error) {
+            courtCaseDetailPage.innerHTML = '<div class="error">Не удалось загрузить дело.</div>';
+            return;
+        }
+        
+        const messages = await apiCall(`/api/cases/${caseId}/messages`);
+        
+        let messagesHTML = '';
+        if (messages && Array.isArray(messages) && messages.length > 0) {
+            messagesHTML = messages.map(msg => `
+                <div class="case-message ${msg.isMine ? 'is-mine' : ''}">
+                    <img src="https://mc-heads.net/avatar/${msg.sender.nickname}/40" class="message-avatar">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">${msg.sender.nickname}</span>
+                            <span class="message-time">${timeSince(new Date(msg.createdAt))}</span>
+                        </div>
+                        <div class="message-text">${msg.text.replace(/\n/g, '<br>')}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            messagesHTML = '<div class="info">Сообщений пока нет.</div>';
+        }
+
+        const isParticipant = currentUser.id === caseData.plaintiffId || currentUser.id === caseData.defendantId || (caseData.judgeId && currentUser.id === caseData.judgeId);
+        const isJudge = currentUser.isJudge;
+        const isAssignedJudge = isJudge && caseData.judgeId && currentUser.id === caseData.judgeId;
+
+        let judgeActionsHTML = '';
+        if (isJudge && caseData.status === 'NEW') {
+            judgeActionsHTML = `<button id="case-take-btn" class="action">Взять дело в работу</button>`;
+        }
+        if (isAssignedJudge && caseData.status === 'IN_PROGRESS') {
+             judgeActionsHTML = `<button id="case-close-btn" class="action danger">Закрыть дело</button>`;
+        }
+
+        courtCaseDetailPage.innerHTML = `
+            <button class="back-button" onclick="showPage(courtPage); loadCourtCases();">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z"/></svg>
+              <span>#${caseData.id}: ${caseData.title}</span>
+            </button>
+            <div class="case-detail-layout">
+                <div class="case-chat-area">
+                    <div id="case-messages-list" class="case-messages-list">${messagesHTML}</div>
+                    ${isParticipant && caseData.status !== 'CLOSED' ? `
+                    <div class="case-message-input-area">
+                        <textarea id="case-message-input" class="modal-input" placeholder="Написать сообщение..."></textarea>
+                        <button id="case-send-message-btn" class="action">Отправить</button>
+                    </div>
+                    ` : `<div class="info">${caseData.status === 'CLOSED' ? `Дело закрыто. Причина: ${caseData.closeReason || 'не указана'}` : 'Вы не являетесь участником дела.'}</div>`}
+                </div>
+                <div class="case-sidebar">
+                    <div class="sidebar-card">
+                        <h3>Действующие лица</h3>
+                        <div class="case-participant">
+                            <img src="https://mc-heads.net/avatar/${caseData.plaintiff.nickname}/32" alt="">
+                            <div><span>${caseData.plaintiff.nickname}</span><small>Подающий</small></div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="case-detail-arrow"><path fill="currentColor" d="m12 16l-6-6h12z"/></svg>
+                        <div class="case-participant">
+                            <img src="https://mc-heads.net/avatar/${caseData.defendant.nickname}/32" alt="">
+                            <div><span>${caseData.defendant.nickname}</span><small>Ответчик</small></div>
+                        </div>
+                    </div>
+                    <div class="sidebar-card">
+                        <h3>Судья дела</h3>
+                         <div class="case-participant">
+                            <img src="https://mc-heads.net/avatar/${caseData.judge?.nickname || 'MHF_Question'}/32" alt="">
+                            <div><span>${caseData.judge?.nickname || 'Не выбран'}</span></div>
+                        </div>
+                    </div>
+                    ${judgeActionsHTML}
+                </div>
+            </div>
+        `;
+        
+        const messagesList = document.getElementById('case-messages-list');
+        if(messagesList) messagesList.scrollTop = messagesList.scrollHeight;
+
+        if (document.getElementById('case-send-message-btn')) {
+            document.getElementById('case-send-message-btn').addEventListener('click', () => sendCaseMessage(caseId));
+        }
+        if (document.getElementById('case-take-btn')) {
+            document.getElementById('case-take-btn').addEventListener('click', () => takeCase(caseId));
+        }
+        if (document.getElementById('case-close-btn')) {
+            document.getElementById('case-close-btn').addEventListener('click', () => handleCloseCase(caseId));
+        }
+      }
+
+      async function sendCaseMessage(caseId) {
+        const input = document.getElementById('case-message-input');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        const result = await apiCall(`/api/cases/${caseId}/messages`, 'POST', { text });
+        if (result && !result.error) {
+            input.value = '';
+            showCaseDetailPage(caseId);
+        }
+      }
+
+      async function takeCase(caseId) {
+        const result = await apiCall(`/api/cases/${caseId}/take`, 'POST');
+        if (result && !result.error) {
+            showCaseDetailPage(caseId);
+        }
+      }
+
+      async function handleCloseCase(caseId) {
+        const reason = prompt("Пожалуйста, укажите причину закрытия дела (вердикт):");
+        if (!reason || reason.trim().length < 3) {
+            alert('Причина закрытия обязательна и должна содержать минимум 3 символа.');
+            return;
+        }
+        
+        const result = await apiCall(`/api/cases/${caseId}/close`, 'POST', { closeReason: reason.trim() });
+        if (result && !result.error) {
+            showCaseDetailPage(caseId);
+        }
+      }
+      
+      newCaseDefendantInput.addEventListener('input', () => {
+          const query = newCaseDefendantInput.value.trim();
+          selectedDefendantForCase = null;
+          if (query.length < 2) {
+              newCaseDefendantSuggestions.style.display = 'none';
+              return;
+          }
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(async () => {
+              const users = await apiCall(`/api/users/search?nickname=${query}`, 'GET');
+              if (users && Array.isArray(users)) {
+                  displaySuggestions(users, 'nickname', newCaseDefendantSuggestions, (user) => {
+                      newCaseDefendantInput.value = user.nickname;
+                      selectedDefendantForCase = user;
+                  });
+              }
+          }, 300);
+      });
+      
+      newCaseSubmitBtn.addEventListener('click', async () => {
+          const title = newCaseTitleInput.value.trim();
+          const reason = newCaseReasonInput.value.trim();
+          
+          newCaseStatusDiv.style.display = 'none';
+
+          if (!title || !reason || !selectedDefendantForCase) {
+              newCaseStatusDiv.textContent = 'Пожалуйста, заполните все поля и выберите ответчика из списка.';
+              newCaseStatusDiv.style.color = "#FB4848";
+              newCaseStatusDiv.style.display = 'block';
+              return;
+          }
+
+          const result = await apiCall('/api/cases', 'POST', {
+              title,
+              reason,
+              defendantId: selectedDefendantForCase.id
+          });
+
+          if(result && !result.error) {
+              newCaseStatusDiv.textContent = 'Дело успешно подано!';
+              newCaseStatusDiv.style.color = "#4CAF50";
+              newCaseStatusDiv.style.display = 'block';
+              setTimeout(() => {
+                  showPage(courtPage);
+                  loadCourtCases();
+              }, 2000);
+          }
+      });
+      
       // --- Initial page load logic ---
       document.addEventListener('DOMContentLoaded', () => {
          if (!currentUser && window.location.hash === '') showPage(welcomeDiv);
@@ -1489,6 +1894,21 @@
              loadTransactions(document.getElementById("personal-transaction-list"), "/api/player/transactions", true);
          } else showPage(welcomeDiv);
       });
+
+      function timeSince(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " г. назад";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " мес. назад";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " д. назад";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " ч. назад";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " мин. назад";
+        return Math.floor(seconds) + " сек. назад";
+    }
 
     </script>
     <script src="stars.js"></script> 
